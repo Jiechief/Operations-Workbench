@@ -1128,7 +1128,7 @@
       { k:"当季缺口合计", v:nfmt(gapSum), h:"目标合计 " + nfmt(tSum) + " · 整体完成 " + (tSum ? Math.round(hSum / tSum * 1000) / 10 : 0) + "%", cls:"warn" },
       { k:"今日下降商家", v:nfmt(cnt(function(r){ return isNum(cell(r, L.dod)) && cell(r, L.dod) < 0; })),
         h:"周同比下降 " + nfmt(cnt(function(r){ return isNum(cell(r, L.wow)) && cell(r, L.wow) < 0; })) + " 家", cls:"warn" },
-      { k:"零优爆品商家", v:nfmt(z), h:"占比 " + Math.round(z / DS.rows.length * 100) + "%", cls:"warn" },
+      { k:"零优爆品商家", v:nfmt(z), h:"占比 " + (DS.rows.length ? Math.round(z / DS.rows.length * 100) : 0) + "%", cls:"warn" },
       { k:"推荐升优品合计", v:nfmt(sum(L.recUp)), h:"潜力优品 " + nfmt(sum(L.poten)) + " 个", cls:"accent" },
       { k:"本月 P4P 消耗", v:nfmt(Math.round(sum(L.p4pM) * 100) / 100, 2),
         h:"环比 " + (sum(L.p4pD) >= 0 ? "+" : "") + nfmt(Math.round(sum(L.p4pD) * 100) / 100, 2)
