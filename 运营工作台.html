@@ -306,6 +306,8 @@
   .chk.warn .cd{background:var(--mid);}
   .chk .ct{flex:1;min-width:0;}
   .chk .cs{font-size:11px;color:var(--muted2);}
+  .tbl-wrap.mdragging{cursor:grabbing;user-select:none;}
+  .tbl-wrap.mdragging table.dt th{cursor:grabbing;}
 </style>
 <body>
 <div class="app">
@@ -954,7 +956,8 @@
     $("#tblFoot").innerHTML = "筛选出 <b>" + list.length + "</b> / " + DS.rows.length + " 家 · 视图内优爆品合计 <b>"
       + nfmt(sumHot) + "</b> · 排序 <b>" + esc(sortName) + "</b> " + (sort.dir === "asc" ? "升序" : "降序")
       + "（空值恒排末位）· 显示 " + visible.length + " / " + DS.cols.length + " 列";
-    $("#dataSub").textContent = "共 " + DS.cols.length + " 列，显示 " + visible.length + " 列 · 点表头排序，点行看全部字段";
+    $("#dataSub").textContent = "共 " + DS.cols.length + " 列，显示 " + visible.length
+      + " 列 · 点表头排序，点行看全部字段 · 按住鼠标中键左右拖动可横向滚动";
     $("#navCountRows").textContent = list.length;
   }
   function fillFilterOptions(){
@@ -2250,7 +2253,41 @@
     }
     return null;
   }
+  /* ---------------- 中键按住左右拖动 = 横向滚动（仅数据总表） ---------------- */
+  var dragLock = 0;
+  function initMiddleDrag(el){
+    if(!el || el._midDrag) return;
+    el._midDrag = 1;
+    var on = false, sx = 0, sl = 0, moved = 0;
+    function ab(x){ return x < 0 ? -x : x; }
+    el.addEventListener("mousedown", function(e){
+      if(e.button !== 1) return;                       /* 只处理中键，左键行为完全不变 */
+      var tag = String((e.target && e.target.tagName) || "").toUpperCase();
+      if(tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+      e.preventDefault();                              /* 屏蔽浏览器自带的中键自动滚动 */
+      on = true; sx = e.clientX; sl = el.scrollLeft; moved = 0;
+      el.classList.add("mdragging");
+    });
+    document.addEventListener("mousemove", function(e){
+      if(!on) return;
+      var dx = e.clientX - sx;
+      if(ab(dx) > moved) moved = ab(dx);
+      el.scrollLeft = sl - dx;                         /* 表头 sticky 在同一滚动容器里，跟着一起走 */
+      if(moved > 3 && e.preventDefault) e.preventDefault();
+    });
+    function stop(){
+      if(!on) return;
+      on = false;
+      el.classList.remove("mdragging");
+      if(moved > 3) dragLock = Date.now();             /* 拖动后短暂屏蔽点击 */
+    }
+    document.addEventListener("mouseup", function(e){ if(e.button === 1) stop(); });
+    window.addEventListener("blur", stop);
+    el.addEventListener("auxclick", function(e){ if(e.button === 1) e.preventDefault(); });
+  }
+
   document.addEventListener("click", function(e){
+    if(Date.now() - dragLock < 260) return;            /* 中键拖动结束时不误触排序 / 开详情 */
     if(e.target.id === "mask"){ closeModal(); return; }
     var seg = e.target.closest ? e.target.closest("#taskStatusSeg button") : null;
     if(seg){
@@ -2463,6 +2500,7 @@
   /* ---------------- 启动 ---------------- */
   applyAppearance();
   fillFilterOptions();
+  initMiddleDrag($("#tblWrap"));
   if(!snaps.length) pushSnap(DS);
   render();
   if(!_lsOk) warnStore();
