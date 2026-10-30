@@ -295,6 +295,17 @@
   .provider-card{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;background:var(--panel2);}
   .provider-card.off{opacity:.6;}
   .provider-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .stamp{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 18px;
+    background:var(--panel2);border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);}
+  .stamp b{color:var(--text);}
+  .stamp .warn-tag{color:var(--high);font-weight:700;}
+  .chk{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+  .chk:last-child{border-bottom:none;}
+  .chk .cd{width:7px;height:7px;border-radius:50%;margin-top:7px;flex:none;background:var(--ok);}
+  .chk.bad .cd{background:var(--high);}
+  .chk.warn .cd{background:var(--mid);}
+  .chk .ct{flex:1;min-width:0;}
+  .chk .cs{font-size:11px;color:var(--muted2);}
 </style>
 <body>
 <div class="app">
@@ -348,6 +359,7 @@
   </aside>
 
   <div class="main">
+    <div class="stamp" id="stamp">数据装载中…</div>
     <div class="main-scroll">
 
       <section class="page active" id="page-dashboard">
@@ -363,6 +375,10 @@
           </div>
         </div>
         <div class="grid grid-4" id="kpiCards" style="margin-bottom:16px"></div>
+        <div class="card" id="deltaCard" style="margin-bottom:16px;display:none">
+          <div class="card-title">与上一份数据的对比<span class="link" data-act="goto" data-view="settings">快照管理 →</span></div>
+          <div class="tip" id="deltaLine">—</div>
+        </div>
         <div class="grid grid-2" style="margin-bottom:16px">
           <div class="card">
             <div class="card-title">一级行业 · 优爆品数<span class="link" data-act="goto" data-view="goals">按行业看目标 →</span></div>
@@ -539,8 +555,15 @@
             <div class="btn-row" style="margin-top:12px">
               <button class="btn primary" data-act="verify">校验数值合计</button>
               <button class="btn" data-act="importData">导入新表格</button>
+              <button class="btn" data-act="undoImport">撤销上次导入</button>
               <button class="btn" data-act="resetData">恢复内置数据</button>
             </div>
+            <div class="hr"></div>
+            <div class="card-title">导入自检清单</div>
+            <div id="selfCheck" class="tip">—</div>
+            <div class="hr"></div>
+            <div class="card-title">历史快照与环比<span class="link" data-act="snapHelp">说明</span></div>
+            <div id="snapList" class="tip">—</div>
             <div class="hr"></div>
             <div class="card-title">字段分组概览</div>
             <div id="groupInfo" class="tip">—</div>
@@ -613,7 +636,7 @@
   var K = {
     settings: P+"settings_v1", tasks: P+"tasks_v1", notes: P+"notes_v1",
     providers: P+"ai_providers_v1", usage: P+"ai_usage_v1", chat: P+"ai_chat_v1",
-    data: P+"dataset_v1"
+    data: P+"dataset_v1", prev: P+"prev_dataset_v1", snaps: P+"snaps_v1"
   };
   var _lsOk = true, _warned = false, _mem = {};
   function lsGet(k){
@@ -1090,7 +1113,7 @@
   function kpiCards(){
     var withT = cnt(function(r){ return isNum(cell(r, L.qTarget)); });
     var met = cnt(function(r){ var t = cell(r, L.qTarget); return isNum(t) && cell(r, L.hot) >= t; });
-    var gapSum = sum(L.qTarget) * 0;
+    var gapSum = 0;
     DS.rows.forEach(function(r){ var g = gapQ(r); if(isNum(g)) gapSum += g; });
     var tSum = sum(L.qTarget), hSum = sum(L.hot);
     var z = cnt(function(r){ return cell(r, L.hot) === 0; });
@@ -1781,13 +1804,17 @@
           var sheetName = wb.SheetNames[0];
           var aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header:1, blankrows:false, defval:null });
           if(!aoa || aoa.length < 2) throw new Error("表里没有找到数据行");
-          var n = aoa[0].length;
-          var headers = aoa[0].map(function(h, i){ return String(h === null || h === undefined || String(h).trim() === "" ? ("第" + (i+1) + "列") : h).trim(); });
+          var hdr = findHeaderRow(aoa);
+          var body = aoa.slice(hdr + 1);
+          var n = aoa[hdr].length;
+          var headers = aoa[hdr].map(function(h, i){
+            return String(h === null || h === undefined || String(h).trim() === "" ? ("第" + (i+1) + "列") : h).trim();
+          });
           var rows = [];
-          for(var i = 1; i < aoa.length; i++){
-            var src = aoa[i], out = [], has = false;
+          for(var i = 0; i < body.length; i++){
+            var src = body[i], out = [], has = false;
             for(var c = 0; c < n; c++){
-              var v = src[c];
+              var v = src ? src[c] : null;
               if(v === undefined) v = null;
               if(v instanceof Date) v = Number("" + v.getFullYear() + String(v.getMonth()+1).padStart(2,"0") + String(v.getDate()).padStart(2,"0"));
               if(typeof v === "string" && v.trim() === "") v = null;
@@ -1796,27 +1823,29 @@
             }
             if(has) rows.push(out);
           }
+          var clean = cleanRows(rows, headers);
+          var cols = headers.map(function(h, idx){
+            var vals = clean.rows.map(function(r){ return r[idx]; });
+            return { i: idx + 1, label:h, type:typeForLabel(h, vals), group:groupForLabel(h),
+                     show: DEFAULT_SHOW.indexOf(h) >= 0 };
+          });
           var nn = [], sm = [];
           for(var c2 = 1; c2 <= n; c2++){
             var k = 0, s = 0;
-            rows.forEach(function(r){
+            clean.rows.forEach(function(r){
               var v = r[c2 - 1];
               if(v !== null){ k++; if(typeof v === "number") s += v; }
             });
             nn.push(k);
             sm.push(k ? Math.round(s * 1e6) / 1e6 : null);
           }
-          var cols = headers.map(function(h, idx){
-            var vals = rows.map(function(r){ return r[idx]; });
-            return { i: idx + 1, label:h, type:typeForLabel(h, vals), group:groupForLabel(h),
-                     show: DEFAULT_SHOW.indexOf(h) >= 0 };
-          });
-          applyDataset({ meta:{ source:f.name, sheet:sheetName,
-              asOf:(f.name.match(/(\d{1,2}\.\d{1,2})/) || [])[1] || "", rows:rows.length, cols:n,
+          var next = { meta:{ source:f.name, sheet:sheetName,
+              asOf:(f.name.match(/(\d{1,2}\.\d{1,2})/) || [])[1] || "", rows:clean.rows.length, cols:n,
               generatedAt:fmtDateTime(Date.now()),
-              generator:"浏览器导入 SheetJS " + (XLSX.version || ""), nonnull:nn, numSum:sm, imported:true },
-            cols:cols, rows:rows }, true);
-          toast("已导入 " + rows.length + " 行 × " + n + " 列");
+              generator:"浏览器导入 SheetJS " + (XLSX.version || ""), nonnull:nn, numSum:sm, imported:true,
+              skipped:clean.skipped, hdrRow:hdr + 1 },
+            cols:cols, rows:clean.rows };
+          showImportPreview(next, clean);
         }catch(err){
           toast("导入失败：" + ((err && err.message) || err));
         }
@@ -1849,10 +1878,278 @@
       onOk:function(){
         try { localStorage.removeItem(K.data); } catch(e){}
         _mem[K.data] = null;
+        pushSnap(DS, true);
         applyDataset(BASE, false);
+        pushSnap(BASE);
+        render();
         toast("已恢复内置数据");
         return true;
       } });
+  }
+
+  /* ---------- 导入管线：表头自动定位 / 脏行剔除 / 预览确认 / 快照 ---------- */
+  var SUM_WORDS = ["合计", "总计", "小计", "汇总", "平均", "均值"];
+  function findHeaderRow(aoa){
+    var hit = -1;
+    for(var i = 0; i < Math.min(aoa.length, 8); i++){
+      var line = (aoa[i] || []).map(function(x){ return String(x === null || x === undefined ? "" : x); }).join("|");
+      if(line.indexOf("公司名称") >= 0 || line.indexOf("admin_mbr_id") >= 0){ hit = i; break; }
+    }
+    return hit < 0 ? 0 : hit;
+  }
+  function nameIdx(){ for(var i = 0; i < TMP_HDR.length; i++){ if(TMP_HDR[i] === "公司名称") return i; } return 1; }
+  function idIdx(){ for(var i = 0; i < TMP_HDR.length; i++){ if(TMP_HDR[i] === "admin_mbr_id") return i; } return 0; }
+  var TMP_HDR = [];
+  function txt(v){ return (v === null || v === undefined || v === "undefined") ? "" : String(v); }
+  function isSummaryRow(row, ni, ii){
+    var nm = txt(row[ni === undefined ? nameIdx() : ni]), id = txt(row[ii === undefined ? idIdx() : ii]);
+    if(!nm && !id) return false;
+    for(var i = 0; i < SUM_WORDS.length; i++){
+      if(nm.indexOf(SUM_WORDS[i]) >= 0 || id.indexOf(SUM_WORDS[i]) >= 0) return true;
+    }
+    return /^[\d.,%]+$/.test(nm);
+  }
+  function cleanRows(rows, headers){
+    TMP_HDR = headers;
+    var ni = nameIdx(), ii = idIdx();
+    var kept = [], seen = {}, dup = [], nSum = 0, empty = 0;
+    rows.forEach(function(r){
+      if(isSummaryRow(r, ni, ii)){ nSum++; return; }
+      var nm = txt(r[ni]), id = txt(r[ii]);
+      if(!nm && !id){ empty++; return; }
+      var pk = id || nm;
+      if(seen[pk]){ dup.push(nm || pk); return; }
+      seen[pk] = 1;
+      kept.push(r);
+    });
+    return { rows:kept, skipped:{ sum:nSum, dup:dup, empty:empty } };
+  }
+  function colDiff(next){
+    var mine = next.cols.map(function(c){ return c.label; });
+    var base = BASE.cols.map(function(c){ return c.label; });
+    var added = mine.filter(function(x){ return base.indexOf(x) < 0; });
+    var gone = base.filter(function(x){ return mine.indexOf(x) < 0; });
+    var missKey = [L.name, L.id, L.hot].filter(function(x){ return mine.indexOf(x) < 0; });
+    return { added:added, gone:gone, missKey:missKey, same:mine.length - added.length };
+  }
+  function showImportPreview(next, clean){
+    var d = colDiff(next);
+    var bytes = JSON.stringify(next).length;
+    var warn = [];
+    if(d.missKey.length) warn.push("缺少关键字段：" + d.missKey.join("、") + "（相关指标会全部显示为空）");
+    if(d.gone.length) warn.push("原表有 " + d.gone.length + " 列在新表里找不到：" + d.gone.slice(0, 8).join("、") + (d.gone.length > 8 ? " …" : ""));
+    if(d.added.length) warn.push("新增 " + d.added.length + " 列（归入「新列」分组，可在列显示里勾选）：" + d.added.slice(0, 8).join("、") + (d.added.length > 8 ? " …" : ""));
+    if(clean.skipped.sum) warn.push("剔除汇总行 " + clean.skipped.sum + " 行");
+    if(clean.skipped.dup.length) warn.push("主键重复 " + clean.skipped.dup.length + " 行（保留第一条）：" + clean.skipped.dup.slice(0, 4).join("、"));
+    if(clean.skipped.empty) warn.push("空行 " + clean.skipped.empty + " 行");
+    if(next.meta.hdrRow > 1) warn.push("表头自动定位在第 " + next.meta.hdrRow + " 行（前面几行按标题行忽略）");
+    if(bytes > 3.6 * 1024 * 1024) warn.push("数据约 " + (bytes / 1048576).toFixed(1) + " MB，接近 localStorage 上限，建议只保留必要列或用脚本方式更新");
+    var cov = [L.name, L.hot, L.qTarget].map(function(lb){
+      var idx = -1;
+      next.cols.forEach(function(c){ if(c.label === lb) idx = c.i - 1; });
+      if(idx < 0) return lb + "：缺列";
+      var k = 0;
+      next.rows.forEach(function(r){ var v = r[idx]; if(v !== null && v !== undefined && v !== "") k++; });
+      return lb + "：" + k + "/" + next.rows.length;
+    });
+    var first = next.rows[0] || [];
+    openModal({
+      title:"导入预览 · " + next.meta.source,
+      wide:true,
+      body:'<div class="tbl-wrap" style="max-height:none"><table class="dt"><tbody>'
+        + "<tr><td>工作表 / 表头行</td><td>" + esc(next.meta.sheet) + " · 第 " + next.meta.hdrRow + " 行</td></tr>"
+        + "<tr><td>规模</td><td>" + next.rows.length + " 行 × " + next.cols.length + " 列（同名匹配 " + d.same + " 列）</td></tr>"
+        + "<tr><td>数据截至</td><td>" + esc(next.meta.asOf || "未能从文件名识别，导入后可手动说明") + "</td></tr>"
+        + "<tr><td>关键列覆盖</td><td>" + esc(cov.join(" · ")) + "</td></tr>"
+        + "<tr><td>存储占用估算</td><td>" + (bytes / 1024).toFixed(0) + " KB</td></tr>"
+        + "<tr><td>首行样例</td><td class=\"mono\">" + esc(first.slice(0, 4).join(" | ")) + "</td></tr>"
+        + "</tbody></table></div>"
+        + (warn.length ? '<div class="grp" style="margin-top:14px"><h3>需要你确认</h3>'
+            + warn.map(function(w){ return '<div class="chk warn"><i class="cd"></i><div class="ct">' + esc(w) + "</div></div>"; }).join("")
+            + "</div>"
+          : '<div class="tip" style="margin-top:12px">列结构与原表一致，没有异常。</div>')
+        + '<div class="tip" style="margin-top:10px">导入前会自动把当前数据存为「上一份」，可用「撤销上次导入」退回；同时写一条历史快照用于环比。</div>',
+      buttons:[{ label:"取消", style:"ghost" }, { label:"确认导入", style:"primary" }],
+      onOk:function(){ commitImport(next); return true; }
+    });
+  }
+  function commitImport(next){
+    var before = { meta: DS.meta, cols: DS.cols, rows: DS.rows };
+    save(K.prev, before);
+    pushSnap(DS, true);
+    applyDataset(next, true);
+    pushSnap(next);
+    render();
+    toast("已导入 " + next.rows.length + " 行 × " + next.cols.length + " 列");
+  }
+  function undoImport(){
+    var prev = read(K.prev, null);
+    if(!prev || !prev.rows){ toast("没有可撤销的上一次导入"); return; }
+    save(K.prev, { meta: DS.meta, cols: DS.cols, rows: DS.rows });
+    pushSnap(DS, true);
+    applyDataset(prev, true);
+    pushSnap(prev);
+    render();
+    toast("已退回上一份数据（" + (prev.meta.asOf || "?") + "）");
+  }
+  /* ---------- 历史快照（只存聚合 + 每家优爆品数，体积小） ---------- */
+  var snaps = read(K.snaps, []);
+  if(!Array.isArray(snaps)) snaps = [];
+  function snapOf(ds){
+    var old = DS;
+    DS = ds; indexDataset();
+    var per = {};
+    ds.rows.forEach(function(r){
+      var id = String(cell(r, L.id) || cell(r, L.name) || "");
+      if(id && id !== "undefined") per[id] = cell(r, L.hot);
+    });
+    var s = {
+      asOf: ds.meta.asOf || fmtDateTime(ds.meta.importedAt || Date.now()).slice(0, 10),
+      source: ds.meta.source || "", at: Date.now(), rows: ds.rows.length, cols: ds.cols.length,
+      hot: sum(L.hot), target: sum(L.qTarget),
+      met: cnt(function(r){ var t = cell(r, L.qTarget); return isNum(t) && cell(r, L.hot) >= t; }),
+      withT: cnt(function(r){ return isNum(cell(r, L.qTarget)); }),
+      gap: ds.rows.reduce(function(a, r){ var g = gapQ(r); return a + (isNum(g) ? g : 0); }, 0),
+      down: cnt(function(r){ return isNum(cell(r, L.dod)) && cell(r, L.dod) < 0; }),
+      zero: cnt(function(r){ return cell(r, L.hot) === 0; }),
+      per: per
+    };
+    DS = old; indexDataset();
+    return s;
+  }
+  function pushSnap(ds, skipSame){
+    var s = snapOf(ds), last = snaps[snaps.length - 1];
+    if(skipSame && last && last.asOf === s.asOf && last.rows === s.rows && last.hot === s.hot && last.gap === s.gap) return;
+    snaps.push(s);
+    while(snaps.length > 12) snaps.shift();
+    save(K.snaps, snaps);
+  }
+  function baseline(){
+    if(snaps.length < 2) return null;
+    if(snaps[snaps.length - 1].asOf !== (DS.meta.asOf || "")) return null;
+    return snaps[snaps.length - 2];
+  }
+  function renderDeltas(){
+    var b = baseline(), card = $("#deltaCard");
+    if(!b || !card){ if(card) card.style.display = "none"; return; }
+    card.style.display = "";
+    var cur = { hot: sum(L.hot), met: cnt(function(r){ var t = cell(r, L.qTarget); return isNum(t) && cell(r, L.hot) >= t; }),
+                gap: DS.rows.reduce(function(a, r){ var g = gapQ(r); return a + (isNum(g) ? g : 0); }, 0),
+                down: cnt(function(r){ return isNum(cell(r, L.dod)) && cell(r, L.dod) < 0; }),
+                zero: cnt(function(r){ return cell(r, L.hot) === 0; }) };
+    function d(name, a, bb, unit){
+      var x = a - bb;
+      var cls = x > 0 ? "pos" : (x < 0 ? "neg" : "dim");
+      var txt = x === 0 ? "持平" : (x > 0 ? "+" + nfmt(x) : nfmt(x));
+      return name + " <span class=\"" + cls + "\">" + txt + (unit || "") + "</span>（" + nfmt(bb) + " → " + nfmt(a) + "）";
+    }
+    $("#deltaLine").innerHTML = "对比上一份 <b>" + esc(b.asOf) + "（" + esc(b.source || "") + "，" + b.rows + " 家）</b>："
+      + [d("优爆品总数", cur.hot, b.hot), d("当季达标家数", cur.met, b.met, " 家"),
+         d("当季缺口", cur.gap, b.gap), d("今日下降", cur.down, b.down, " 家"),
+         d("零优爆品", cur.zero, b.zero, " 家")].join("　·　");
+  }
+  function renderSnaps(){
+    var box = $("#snapList");
+    if(!box) return;
+    if(!snaps.length){ box.innerHTML = '<div class="tip">还没有快照。第一次导入新表格时会自动记录。</div>'; return; }
+    box.innerHTML = '<div class="tbl-wrap" style="max-height:none"><table class="dt"><thead><tr>'
+      + "<th>截至</th><th>记录于</th><th class=\"num\">家数</th><th class=\"num\">优爆品</th><th class=\"num\">达标</th>"
+      + '<th class="num">缺口</th><th>来源</th><th class="num">操作</th></tr></thead><tbody>'
+      + snaps.slice().reverse().map(function(s){
+          var idx = snaps.length - 1 - snaps.slice().reverse().indexOf(s);
+          return "<tr><td>" + esc(s.asOf) + (idx === snaps.length - 1 ? ' <span class="badge doing">当前</span>' : "")
+            + '</td><td class="dim">' + esc(fmtDateTime(s.at).slice(5))
+            + '</td><td class="num">' + nfmt(s.rows) + '</td><td class="num">' + nfmt(s.hot)
+            + '</td><td class="num">' + nfmt(s.met) + "/" + nfmt(s.withT) + '</td><td class="num">' + nfmt(s.gap)
+            + "</td><td>" + esc(String(s.source || "").slice(0, 18))
+            + '</td><td class="num"><button class="btn ghost sm" type="button" data-act="delSnap" data-i="' + idx + '">删</button></td></tr>';
+        }).join("")
+      + "</tbody></table></div>";
+  }
+  function delSnap(i){
+    if(i < 0 || i >= snaps.length) return;
+    snaps.splice(i, 1);
+    save(K.snaps, snaps);
+    renderSnaps(); renderDeltas(); toast("已删除该快照");
+  }
+  function snapHelp(){
+    openModal({ title:"快照与环比是怎么回事",
+      body:'<div class="tip">每次「确认导入」新表格时，工作台会把<b>换掉之前</b>那份数据的汇总（家数、优爆品合计、达标家数、缺口、下降/零优爆品家数，以及每家 admin_mbr_id 的优爆品数）留成一条快照，最多 12 条。<br><br>'
+        + "· 总览看板会出现「与上一份数据的对比」，直接看这次换数据的净变化；<br>"
+        + "· 快照只存汇总，不存整表，所以不占空间；<br>"
+        + "· 想永久留档，建议用 <span class=\"mono\">tools/导出工作台数据.py</span> 生成带日期的 ops-data.js 提交到 git，历史可追溯；<br>"
+        + "· 「撤销上次导入」退回上一层数据，「恢复内置数据」退回随仓库发布的内置表。</div>",
+      buttons:[{ label:"关闭", style:"ghost" }, { label:"知道了", style:"primary" }] });
+  }
+  /* ---------- 时效横幅 + 自检清单 ---------- */
+  function asOfDate(){
+    var m = String(DS.meta.asOf || "").match(/(\d{1,2})[.\/](\d{1,2})/);
+    if(!m) return null;
+    var y = new Date().getFullYear();
+    var d = new Date(y, Number(m[1]) - 1, Number(m[2]), 23, 59, 59);
+    if(d.getTime() - Date.now() > 86400000 * 3) d = new Date(y - 1, Number(m[1]) - 1, Number(m[2]), 23, 59, 59);
+    return d;
+  }
+  function selfChecks(){
+    var ids = {}, dup = 0, noId = 0;
+    var iId = COLIDX[L.id], iName = COLIDX[L.name], iHot = COLIDX[L.hot], iTgt = COLIDX[L.qTarget];
+    DS.rows.forEach(function(r){
+      var id = iId === undefined ? "" : String(r[iId - 1] === null || r[iId - 1] === undefined ? "" : r[iId - 1]);
+      if(!id){ noId++; return; }
+      if(ids[id]) dup++; else ids[id] = 1;
+    });
+    var sums = numSums(), ref = DS.meta.numSum || [], badSum = 0;
+    for(var i = 0; i < DS.cols.length; i++){
+      if(ref[i] !== null && ref[i] !== undefined && sums[i] !== null && Math.abs(ref[i] - sums[i]) > 1e-6) badSum++;
+    }
+    var cov = function(idx){ if(idx === undefined) return 0; var k = 0; DS.rows.forEach(function(r){ var v = r[idx - 1]; if(v !== null && v !== undefined && v !== "") k++; }); return DS.rows.length ? k / DS.rows.length : 0; };
+    var d0 = asOfDate(), stale = d0 ? Math.floor((Date.now() - d0.getTime()) / 86400000) : null;
+    var mine = DS.cols.map(function(c){ return c.label; });
+    var matched = BASE.cols.filter(function(c){ return mine.indexOf(c.label) >= 0; }).length;
+    var r0 = DS.rows[0], okRate = true;
+    if(r0 && isNum(cell(r0, L.qTarget)) && cell(r0, L.qTarget) > 0) okRate = Math.abs(rateQ(r0) - cell(r0, L.hot) / cell(r0, L.qTarget)) < 1e-12;
+    return [
+      { ok: DS.rows.length > 0, warn: false, t: "数据行数 &gt; 0", s: DS.rows.length + " 行" },
+      { ok: DS.cols.length >= 90, warn: DS.cols.length >= 60, t: "列宽符合预期（98 列）", s: DS.cols.length + " 列" },
+      { ok: iId !== undefined, warn: false, t: "主键列 admin_mbr_id 存在", s: iId === undefined ? "缺列" : "第 " + iId + " 列" },
+      { ok: dup === 0 && noId === 0, warn: dup > 0, t: "主键唯一且非空", s: dup ? (dup + " 行重复") : (noId ? (noId + " 行无 ID") : "通过") },
+      { ok: !DS.rows.some(function(r){ return isSummaryRow(r, (iName || 2) - 1, (iId || 1) - 1); }), warn: false, t: "无汇总行残留", s: DS.meta.skipped && DS.meta.skipped.sum ? ("导入时已剔 " + DS.meta.skipped.sum + " 行") : "通过" },
+      { ok: badSum === 0, warn: false, t: "逐列合计与导出基准一致", s: badSum ? (badSum + " 列不一致") : "98 列全部一致" },
+      { ok: cov(iName) === 1 && cov(iHot) === 1, warn: false, t: "公司名称 / 当前优爆品数 覆盖率 100%", s: Math.round(cov(iName) * 100) + "% · " + Math.round(cov(iHot) * 100) + "%" },
+      { ok: cov(iTgt) >= 0.7, warn: cov(iTgt) >= 0.5, t: "当季度参考目标覆盖率 ≥ 70%", s: Math.round(cov(iTgt) * 100) + "%" },
+      { ok: matched >= BASE.cols.length * 0.9, warn: matched >= BASE.cols.length * 0.7, t: "列名与内置原表匹配 ≥ 90%", s: matched + " / " + BASE.cols.length },
+      { ok: okRate, warn: false, t: "派生公式抽查：完成率 = 优爆品 ÷ 目标", s: okRate ? "通过" : "不一致" },
+      { ok: stale !== null && stale <= 45, warn: stale !== null && stale <= 90, t: "数据新鲜度 ≤ 45 天", s: stale === null ? "未能识别截至日期" : ("已 " + stale + " 天") }
+    ];
+  }
+  function runSelfCheck(){
+    var list = selfChecks(), bad = list.filter(function(x){ return !x.ok; }).length;
+    var box = $("#selfCheck");
+    if(box){
+      box.innerHTML = list.map(function(x){
+        return '<div class="chk' + (x.ok ? (x.warn ? " warn" : "") : " bad") + '"><i class="cd"></i>'
+          + '<div class="ct">' + x.t + '<div class="cs">' + esc(x.s) + "</div></div>"
+          + '<span class="badge ' + (x.ok ? "ok" : "high") + '">' + (x.ok ? "通过" : "异常") + "</span></div>";
+      }).join("");
+    }
+    return { bad: bad, total: list.length };
+  }
+  function renderStamp(){
+    var box = $("#stamp");
+    if(!box) return;
+    var sc = runSelfCheck();
+    var d0 = asOfDate();
+    var stale = d0 ? Math.floor((Date.now() - d0.getTime()) / 86400000) : null;
+    var old = stale !== null && stale > 45;
+    box.innerHTML = "数据截至 <b>" + esc(DS.meta.asOf || "未知") + "</b>"
+      + (stale === null ? "" : "（" + stale + " 天前）")
+      + "　·　来源 <b>" + esc(DS.meta.source || "-") + "</b>"
+      + "　·　" + DS.rows.length + " 家 × " + DS.cols.length + " 列"
+      + "　·　快照 <b>" + snaps.length + "</b> 份"
+      + "　·　自检 <b>" + (sc.total - sc.bad) + "/" + sc.total + "</b>"
+      + (sc.bad ? ' <span class="warn-tag">' + sc.bad + ' 项异常，见「数据源与设置」</span>' : "")
+      + (old ? ' <span class="warn-tag">数据偏旧，建议从后台重新导出</span>' : "")
+      + '　·　<button class="btn sm" type="button" data-act="importData">导入新表格</button>';
   }
   function fillSettings(){
     $("#setName").value = settings.name || "";
@@ -1914,6 +2211,9 @@
     renderUsage();
     fillSettings();
     renderSrcInfo();
+    renderSnaps();
+    renderDeltas();
+    renderStamp();
   }
   function showView(v){
     view = v;
@@ -2042,6 +2342,9 @@
       case "verify": verifyData(); break;
       case "importData": importData(); break;
       case "resetData": resetData(); break;
+      case "undoImport": undoImport(); break;
+      case "snapHelp": snapHelp(); break;
+      case "delSnap": delSnap(parseInt(el.getAttribute("data-i"), 10)); break;
       case "saveSettings": saveSettingsForm(); break;
       case "exportAll": exportAll(); break;
       case "clearAll": clearAllLocal(); break;
@@ -2160,6 +2463,7 @@
   /* ---------------- 启动 ---------------- */
   applyAppearance();
   fillFilterOptions();
+  if(!snaps.length) pushSnap(DS);
   render();
   if(!_lsOk) warnStore();
 })();

@@ -5,5 +5,6 @@ build/
 __pycache__/
 *.pyc
 _check.js
+_tmp_*.js
 *.tmp
 .DS_Store
