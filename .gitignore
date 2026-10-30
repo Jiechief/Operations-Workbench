@@ -8,3 +8,11 @@ _check.js
 _tmp_*.js
 *.tmp
 .DS_Store
+
+# 真实客户数据绝不进 git —— 本地导入或脚本生成的真实数据用这些扩展名隔离
+ops-data.real.bak
+ops-data.real.js
+ops-data.local.js
+*.real.xlsx
+*.real.csv
+data/private/

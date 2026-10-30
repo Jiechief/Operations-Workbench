@@ -1,7 +1,8 @@
 # 运营工作台 Operations Workbench
 
-以 **国际站商家优爆品数据表**（`截至10.24数据(1).xlsx`，200 家 × 98 列）为核心的单文件运营工作台。
-数据逐格原样内置，页面只做展示与计算，**不改动任何原始数值**；待办、跟进笔记、AI 配置写在浏览器 localStorage，无后端。
+以 **国际站商家优爆品数据表**（98 列结构）为核心的单文件运营工作台。
+
+> **数据安全说明**：仓库内置的 `ops-data.js` 是**脱敏示例数据**（200 家虚构「示例公司N号」+ `demo_NNN`，无任何真实公司名、admin_mbr_id、销售/拍档姓名）。真实数据从不进 git——通过页面「导入新表格」从本机浏览器加载，只存在 localStorage，不上传任何服务器。
 
 骨架沿用 [customer-workbench](https://github.com/Jiechief/customer-workbench)：一个 HTML 主程序 + 本地代理脚本 + 双击启动脚本。
 

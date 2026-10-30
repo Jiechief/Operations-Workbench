@@ -1693,7 +1693,9 @@
     $("#srcInfo").innerHTML = "文件：<b>" + esc(DS.meta.source || "-") + "</b>　工作表：" + esc(DS.meta.sheet || "-")
       + "<br>规模：<b>" + DS.rows.length + " 行 × " + DS.cols.length + " 列</b>　数据截至：<b>" + esc(DS.meta.asOf || "-") + "</b>"
       + "<br>生成时间：" + esc(DS.meta.generatedAt || "-") + "<br>方式：" + esc(DS.meta.generator || "-")
-      + (DS.meta.imported ? '<br><span class="badge mid">来自手动导入</span>' : '<br><span class="badge ok">内置数据 ops-data.js</span>');
+      + (DS.meta.imported ? '<br><span class="badge mid">来自手动导入</span>'
+         : (DS.meta.demo ? '<br><span class="badge ok">内置示例数据（脱敏）</span>'
+                         : '<br><span class="badge ok">内置数据 ops-data.js</span>'));
     $("#groupInfo").innerHTML = Object.keys(g).map(function(k){
       return '<span class="badge plain" style="margin:0 6px 6px 0">' + esc(k) + " · " + g[k] + " 列</span>";
     }).join("");
