@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-skin="teal">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="以国际站商家优爆品数据表为核心的运营工作台：数据总表、目标进度、升优机会、待办跟进、AI 助手，全部本地运行。">
+<style>
+  :root{
+    --bg:#dfeae8; --panel:#eef6f5; --panel2:#e4f0ee; --sidebar:#d3e4e1; --text:#1f3330;
+    --muted:#54706c; --muted2:#88a29e; --border:#c9ded9; --border2:#b3cfc9;
+    --accent:#2f8f83; --accent-soft:#d3e9e5; --accent-weak:#ecf6f4;
+    --high:#d2606b; --mid:#d99a4e; --low:#9aa3a0; --over:#d2606b; --done:#4f86c6; --broken:#8b7e8c;
+    --ok:#4f9e6b;
+    --shadow-sm:0 1px 2px rgba(30,60,55,.06);
+    --shadow:0 1px 3px rgba(30,60,55,.08),0 4px 16px rgba(30,60,55,.05);
+    --shadow-md:0 2px 6px rgba(30,60,55,.10),0 10px 28px rgba(30,60,55,.08);
+    --shadow-lg:0 8px 40px rgba(20,40,35,.22);
+    --radius:14px; --radius-sm:10px; --ease:cubic-bezier(.4,0,.2,1);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;
+    --font-mono:"Cascadia Mono",Consolas,"SFMono-Regular",Menlo,monospace;
+  }
+  html[data-skin="teal"]{
+    --bg:#dfeae8; --panel:#eef6f5; --panel2:#e4f0ee; --sidebar:#d3e4e1; --text:#1f3330;
+    --muted:#54706c; --muted2:#88a29e; --border:#c9ded9; --border2:#b3cfc9;
+    --accent:#2f8f83; --accent-soft:#d3e9e5; --accent-weak:#ecf6f4;
+  }
+  html[data-skin="purple"]{
+    --bg:#e8e4f1; --panel:#f4f2fb; --panel2:#ece8f6; --sidebar:#ddd6ec; --text:#2c2738;
+    --muted:#6a647e; --muted2:#9590a8; --border:#d8d1ea; --border2:#c7bde1;
+    --accent:#7a6fc4; --accent-soft:#e3ddf6; --accent-weak:#f1edfb;
+  }
+  html[data-skin="blue"]{
+    --bg:#e1e9f1; --panel:#f1f6fb; --panel2:#e7eef5; --sidebar:#d6e1ee; --text:#26313f;
+    --muted:#5c6b7d; --muted2:#8c9ab0; --border:#cdd9e8; --border2:#b9c9de;
+    --accent:#4f86c6; --accent-soft:#dbe7f5; --accent-weak:#eef4fb;
+  }
+  html[data-skin="green"]{
+    --bg:#e3ede1; --panel:#f2f8f0; --panel2:#e9f1e7; --sidebar:#d9e7d9; --text:#27332b;
+    --muted:#5f7264; --muted2:#8aa090; --border:#cfe0d2; --border2:#bcd4c4;
+    --accent:#4f9e6b; --accent-soft:#dcefe2; --accent-weak:#eef8f1;
+  }
+  html[data-skin="orange"]{
+    --bg:#f0e9da; --panel:#faf6ee; --panel2:#f5efe2; --sidebar:#e9dfcc; --text:#39301f;
+    --muted:#796a52; --muted2:#a8987c; --border:#e6dcc7; --border2:#dad0b9;
+    --accent:#b58a3e; --accent-soft:#f0e3c5; --accent-weak:#fbf4e6;
+  }
+  html[data-skin="rose"]{
+    --bg:#f0e3ea; --panel:#faf3f7; --panel2:#f5e9ef; --sidebar:#e9d6e0; --text:#392633;
+    --muted:#7a6470; --muted2:#a88898; --border:#e8d4de; --border2:#dcbed0;
+    --accent:#b56a8e; --accent-soft:#f2dde8; --accent-weak:#fcf2f7;
+  }
+  html[data-theme="dark"]{
+    --bg:#181a20; --panel:#20232b; --panel2:#272b34; --sidebar:#1c1f26; --text:#e6e8ee;
+    --muted:#a2a8b6; --muted2:#767d8c; --border:#2e323c; --border2:#3c414d;
+    --accent-soft:#2b3040; --accent-weak:#232733;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+    --shadow:0 1px 3px rgba(0,0,0,.5),0 4px 16px rgba(0,0,0,.3);
+    --shadow-md:0 2px 8px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.35);
+    --shadow-lg:0 10px 48px rgba(0,0,0,.6);
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:var(--font); font-size:14px; line-height:1.6;
+    background:var(--bg); color:var(--text); overflow:hidden;
+    -webkit-font-smoothing:antialiased; transition:background .25s var(--ease),color .25s var(--ease);
+  }
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+  a{color:var(--accent);text-decoration:none;}
+  ::-webkit-scrollbar{width:10px;height:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:6px;border:3px solid transparent;background-clip:content-box;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .app{display:flex;height:100vh;height:100dvh;overflow:hidden;}
+  .sidebar{
+    width:236px;flex:none;display:flex;flex-direction:column;background:var(--sidebar);
+    border-right:1px solid var(--border);transition:width .2s var(--ease);overflow:hidden;
+  }
+  .sidebar.collapsed{width:64px;}
+  .brand{display:flex;align-items:center;gap:10px;padding:16px 14px 12px;position:relative;}
+  .logo{width:38px;height:38px;border-radius:10px;background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex:none;}
+  .brand-title{font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap;}
+  .brand-sub{font-size:10px;color:var(--muted2);letter-spacing:.6px;margin-top:2px;white-space:nowrap;}
+  .sidebar.collapsed .brand-text{display:none;}
+  .collapse-btn{margin-left:auto;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;
+    justify-content:center;cursor:pointer;color:var(--muted2);border:none;background:transparent;font-size:13px;
+    transition:background .15s,color .15s,transform .2s;flex:none;}
+  .collapse-btn:hover{background:var(--panel2);color:var(--text);}
+  .sidebar.collapsed .collapse-btn{margin:0 auto;transform:rotate(180deg);}
+  .nav{flex:1;overflow:auto;padding:0 12px 12px;}
+  .nav-sep{font-size:11px;color:var(--muted2);letter-spacing:.8px;padding:16px 10px 6px;font-weight:600;}
+  .sidebar.collapsed .nav-sep{font-size:0;padding:10px 8px 4px;text-align:center;}
+  .sidebar.collapsed .nav-sep::before{content:"·";font-size:14px;color:var(--border2);}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;
+    color:var(--muted);margin-bottom:2px;transition:.15s;user-select:none;position:relative;}
+  .nav-item:hover{background:var(--panel2);color:var(--text);}
+  .nav-item.active{background:var(--accent-weak);color:var(--accent);font-weight:700;}
+  .nav-item.active::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;background:var(--accent);
+    border-radius:0 3px 3px 0;}
+  .nav-item svg{width:18px;height:18px;fill:currentColor;flex:none;}
+  .nav-item .nav-text{white-space:nowrap;overflow:hidden;}
+  .nav-item .nav-count{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted2);background:var(--panel2);
+    border-radius:20px;padding:1px 7px;}
+  .nav-item.active .nav-count{background:var(--accent-soft);color:var(--accent);}
+  .sidebar.collapsed .nav-item{justify-content:center;padding:9px 0;}
+  .sidebar.collapsed .nav-item .nav-text,.sidebar.collapsed .nav-item .nav-count{display:none;}
+  .sidebar.collapsed .nav-item::after{content:attr(data-tip);position:absolute;left:100%;top:50%;
+    transform:translateY(-50%);margin-left:10px;padding:4px 10px;border-radius:6px;background:var(--text);
+    color:var(--panel);font-size:12px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:60;}
+  .sidebar.collapsed .nav-item:hover::after{opacity:1;}
+  .sidebar-foot{padding:10px 14px;font-size:11px;color:var(--muted2);border-top:1px solid var(--border);
+    line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .sidebar-foot .foot-txt{flex:1;min-width:0;}
+  .sidebar.collapsed .sidebar-foot{flex-direction:column;padding:8px 4px;gap:6px;}
+  .sidebar.collapsed .sidebar-foot .foot-txt{display:none;}
+  .skin-row{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;}
+  .skin-dot{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;padding:0;
+    transition:transform .15s,outline-color .15s;outline:2px solid transparent;outline-offset:1px;flex:none;}
+  .skin-dot:hover{transform:scale(1.2);}
+  .skin-dot.active{outline-color:var(--text);border-color:transparent;}
+  .icon-btn{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--panel);
+    color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;}
+  .icon-btn:hover{color:var(--text);border-color:var(--border2);}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .main-scroll{flex:1;overflow:auto;padding:24px 26px 48px;}
+  .page{display:none;}
+  .page.active{display:block;}
+  .page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .crumb{font-size:12px;color:var(--muted);letter-spacing:.4px;margin-bottom:4px;}
+  .page-header h1{font-size:25px;margin:0;font-weight:800;letter-spacing:-.3px;}
+  .page-header .sub{font-size:12px;color:var(--muted2);margin-top:6px;}
+  .page-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+
+  .grid{display:grid;gap:16px;}
+  .grid-4{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .grid-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+  @media (max-width:1280px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr));}.grid-3{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media (max-width:820px){.grid-4,.grid-3,.grid-2{grid-template-columns:minmax(0,1fr);}}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;}
+  .card-title{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.3px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+  .card-title .link{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;}
+  .stat{display:flex;flex-direction:column;gap:3px;}
+  .stat .num{font-size:25px;font-weight:800;letter-spacing:-.5px;line-height:1.15;}
+  .stat .lbl{font-size:12px;color:var(--muted);}
+  .stat .hint{font-size:11px;color:var(--muted2);}
+  .stat.warn .num{color:var(--high);}
+  .stat.ok .num{color:var(--ok);}
+  .stat.accent .num{color:var(--accent);}
+  .stat.mid .num{color:var(--mid);}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--radius-sm);
+    border:1px solid var(--border2);background:var(--panel);color:var(--text);cursor:pointer;
+    font-size:13px;font-weight:600;transition:.15s;white-space:nowrap;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{filter:brightness(1.07);color:#fff;}
+  .btn.danger{color:var(--high);border-color:var(--high);}
+  .btn.sm{padding:4px 9px;font-size:12px;border-radius:8px;}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--muted);}
+  .btn.ghost:hover{background:var(--panel2);color:var(--text);}
+  .btn[disabled]{opacity:.5;cursor:not-allowed;}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;cursor:pointer;
+    border:1px solid var(--border2);background:var(--panel);color:var(--muted);font-size:12px;font-weight:600;transition:.15s;}
+  .chip:hover{border-color:var(--accent);color:var(--accent);}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;
+    border-radius:20px;background:var(--panel2);color:var(--muted);white-space:nowrap;}
+  .badge.high{background:rgba(210,96,107,.16);color:var(--high);}
+  .badge.mid{background:rgba(217,154,78,.18);color:var(--mid);}
+  .badge.done{background:rgba(79,134,198,.16);color:var(--done);}
+  .badge.doing{background:var(--accent-soft);color:var(--accent);}
+  .badge.ok{background:rgba(79,158,107,.16);color:var(--ok);}
+  .badge.plain{background:var(--accent-weak);color:var(--accent);}
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+  .field > label{font-size:12px;font-weight:600;color:var(--muted);}
+  .input,.select,.textarea{width:100%;padding:8px 11px;border-radius:var(--radius-sm);
+    border:1px solid var(--border2);background:var(--panel2);color:var(--text);transition:.15s;font-size:13px;}
+  .textarea{min-height:84px;resize:vertical;line-height:1.6;}
+  .input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--accent);background:var(--panel);
+    box-shadow:0 0 0 3px var(--accent-soft);}
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;}
+  .form-grid .full{grid-column:1 / -1;}
+  .check{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer;}
+  .check input{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+  .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:14px;}
+  .search{position:relative;flex:1;min-width:190px;max-width:330px;}
+  .search .input{padding-left:30px;}
+  .search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:15px;height:15px;fill:var(--muted2);}
+  .tbl-wrap{border:1px solid var(--border);border-radius:var(--radius);background:var(--panel);
+    overflow:auto;box-shadow:var(--shadow);max-height:calc(100vh - 300px);}
+  table.dt{border-collapse:separate;border-spacing:0;font-size:12.5px;width:max-content;min-width:100%;}
+  table.dt th{position:sticky;top:0;z-index:3;background:var(--panel2);color:var(--muted);
+    font-size:11px;font-weight:700;text-align:left;padding:9px 10px;white-space:nowrap;
+    border-bottom:1px solid var(--border2);cursor:pointer;user-select:none;}
+  table.dt th:hover{color:var(--accent);}
+  table.dt th.sorted{color:var(--accent);background:var(--accent-weak);}
+  table.dt th .arw{font-size:9px;margin-left:3px;}
+  table.dt th.num,table.dt td.num{text-align:right;}
+  table.dt td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap;vertical-align:middle;}
+  table.dt tbody tr:hover td{background:var(--accent-weak);}
+  table.dt tbody tr.sel td{background:var(--accent-soft);}
+  table.dt td.name{max-width:230px;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+  table.dt th.stick,table.dt td.stick{position:sticky;left:0;z-index:2;background:var(--panel);
+    border-right:1px solid var(--border2);}
+  table.dt th.stick{z-index:4;background:var(--panel2);}
+  table.dt tbody tr:hover td.stick{background:var(--accent-weak);}
+  .pos{color:var(--ok);font-weight:700;}
+  .neg{color:var(--high);font-weight:700;}
+  .dim{color:var(--muted2);}
+  .bar-cell{position:relative;min-width:86px;}
+  .bar-cell i{position:absolute;left:0;top:50%;transform:translateY(-50%);height:60%;background:var(--accent-soft);
+    border-radius:3px;z-index:0;}
+  .bar-cell span{position:relative;z-index:1;}
+  .pager{display:flex;align-items:center;gap:10px;justify-content:flex-end;margin-top:10px;font-size:12px;color:var(--muted2);flex-wrap:wrap;}
+  .chart{width:100%;height:auto;display:block;}
+  .chart text{font-family:var(--font);fill:var(--muted);}
+  .chart .lbl{font-size:11px;}
+  .chart .val{font-size:11px;fill:var(--text);font-weight:700;}
+  .rank{display:flex;flex-direction:column;}
+  .rank .r{display:flex;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--border);
+    font-size:12.5px;cursor:pointer;}
+  .rank .r:last-child{border-bottom:none;}
+  .rank .r:hover .nm{color:var(--accent);}
+  .rank .r .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rank .r .no{width:18px;color:var(--muted2);font-size:11px;flex:none;}
+  .rank .r .vv{font-weight:700;flex:none;}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,96vw);background:var(--panel);
+    border-left:1px solid var(--border);box-shadow:var(--shadow-lg);z-index:120;display:none;
+    flex-direction:column;}
+  .drawer.show{display:flex;}
+  .drawer-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;flex:none;}
+  .drawer-head h2{margin:0;font-size:16px;font-weight:800;line-height:1.35;}
+  .drawer-body{flex:1;overflow:auto;padding:16px 18px 40px;}
+  .drawer-foot{padding:12px 18px;border-top:1px solid var(--border);background:var(--panel2);
+    display:flex;gap:8px;flex-wrap:wrap;flex:none;}
+  .grp{margin-bottom:18px;}
+  .grp > h3{margin:0 0 8px;font-size:12px;color:var(--accent);letter-spacing:.5px;font-weight:700;
+    display:flex;align-items:center;gap:8px;}
+  .grp > h3::after{content:"";flex:1;height:1px;background:var(--border);}
+  .kv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .kv-grid .k{background:var(--panel2);padding:7px 10px;font-size:11.5px;color:var(--muted);}
+  .kv-grid .v{background:var(--panel);padding:7px 10px;font-size:12.5px;text-align:right;word-break:break-all;}
+  .kv-grid .v .raw{display:block;font-size:10.5px;color:var(--muted2);font-family:var(--font-mono);}
+  .mask{position:fixed;inset:0;background:rgba(20,16,35,.45);backdrop-filter:blur(3px);display:none;
+    align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .mask.show{display:flex;}
+  .modal{background:var(--panel);border-radius:16px;box-shadow:var(--shadow-lg);width:min(680px,100%);
+    max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+  .modal.wide{width:min(940px,100%);}
+  .modal-head{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;
+    justify-content:space-between;gap:12px;flex:none;}
+  .modal-head h2{margin:0;font-size:16px;font-weight:800;}
+  .modal-body{padding:16px 20px;overflow:auto;flex:1;}
+  .modal-foot{padding:13px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;
+    gap:8px;flex:none;background:var(--panel2);}
+  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);background:var(--text);
+    color:var(--panel);padding:9px 17px;border-radius:24px;font-size:13px;font-weight:600;opacity:0;
+    pointer-events:none;transition:.22s var(--ease);z-index:200;box-shadow:var(--shadow-md);max-width:82vw;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .empty{text-align:center;padding:38px 20px;color:var(--muted2);}
+  .empty h3{margin:0 0 6px;font-size:14px;color:var(--muted);font-weight:700;}
+  .empty p{margin:0;font-size:12.5px;}
+  .list{display:flex;flex-direction:column;}
+  .row{display:flex;align-items:flex-start;gap:11px;padding:11px 4px;border-bottom:1px solid var(--border);}
+  .row:last-child{border-bottom:none;}
+  .row .grow{flex:1;min-width:0;}
+  .row .rt{flex:none;display:flex;gap:6px;align-items:center;}
+  .row-title{font-weight:600;font-size:13.5px;}
+  .row-title.done{text-decoration:line-through;color:var(--muted2);}
+  .row-meta{font-size:12px;color:var(--muted2);margin-top:3px;display:flex;gap:9px;flex-wrap:wrap;}
+  .row-note{font-size:12.5px;color:var(--muted);margin-top:5px;white-space:pre-wrap;}
+  .tick{width:18px;height:18px;border-radius:6px;border:1.5px solid var(--border2);background:var(--panel);
+    cursor:pointer;flex:none;margin-top:2px;display:flex;align-items:center;justify-content:center;
+    color:transparent;font-size:11px;transition:.15s;padding:0;}
+  .tick.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tip{font-size:12px;color:var(--muted2);line-height:1.7;}
+  .mono{font-family:var(--font-mono);font-size:12px;}
+  .hr{height:1px;background:var(--border);margin:16px 0;}
+  .tabs{display:flex;gap:2px;background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:2px;flex-wrap:wrap;}
+  .tabs button{border:none;background:transparent;color:var(--muted);padding:5px 12px;border-radius:8px;
+    cursor:pointer;font-size:12px;font-weight:600;transition:.15s;}
+  .tabs button.active{background:var(--panel);color:var(--accent);box-shadow:var(--shadow-sm);}
+  .chat{display:flex;flex-direction:column;gap:12px;min-height:200px;max-height:40vh;overflow:auto;padding:4px 2px;}
+  .msg{max-width:84%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+  .msg.user{align-self:flex-end;background:var(--accent);color:#fff;}
+  .msg.bot{align-self:flex-start;background:var(--panel2);border:1px solid var(--border);}
+  .msg .who{font-size:10.5px;opacity:.72;margin-bottom:4px;}
+  .provider-card{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;background:var(--panel2);}
+  .provider-card.off{opacity:.6;}
+  .provider-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+</style>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo" id="brandLogo">运</div>
+      <div class="brand-text">
+        <div class="brand-title" id="brandTitle">运营工作台</div>
+        <div class="brand-sub" id="brandSub">OPERATIONS WORKBENCH</div>
+      </div>
+      <button class="collapse-btn" id="btnCollapse" type="button" title="折叠 / 展开侧栏">&#9664;</button>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-sep">数据</div>
+      <a class="nav-item active" data-view="dashboard" data-tip="总览看板">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        <span class="nav-text">总览看板</span>
+      </a>
+      <a class="nav-item" data-view="data" data-tip="商家数据总表">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18v4H3zm0 6h18v3H3zm0 5h18v3H3z"/></svg>
+        <span class="nav-text">商家数据总表</span><span class="nav-count" id="navCountRows">0</span>
+      </a>
+      <a class="nav-item" data-view="goals" data-tip="目标进度">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12zm0 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg>
+        <span class="nav-text">目标进度</span>
+      </a>
+      <a class="nav-item" data-view="chances" data-tip="升优机会">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.6L21 9.3l-5 4.4 1.5 6.8L12 17l-5.5 3.5L8 13.7 3 9.3l6.4-.7z"/></svg>
+        <span class="nav-text">升优机会</span><span class="nav-count" id="navCountChance">0</span>
+      </a>
+      <div class="nav-sep">跟进</div>
+      <a class="nav-item" data-view="tasks" data-tip="待办任务">
+        <svg viewBox="0 0 24 24"><path d="M19 3h-4.2C14.4 1.8 13.3 1 12 1s-2.4.8-2.8 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-2 14-4-4 1.4-1.4L10 14.2l6.6-6.6L18 9l-8 8z"/></svg>
+        <span class="nav-text">待办任务</span><span class="nav-count" id="navCountTasks">0</span>
+      </a>
+      <a class="nav-item" data-view="ai" data-tip="AI 助手">
+        <svg viewBox="0 0 24 24"><path d="M19 9l1.3-2.8L23 5l-2.8-1.3L19 1l-1.3 2.7L15 5l2.7 1.3zM11.5 9.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12zM19 15l-1.3 2.8L15 19l2.7 1.2L19 23l1.3-2.8L23 19l-2.7-1.2z"/></svg>
+        <span class="nav-text">AI 助手</span>
+      </a>
+      <div class="nav-sep">系统</div>
+      <a class="nav-item" data-view="settings" data-tip="数据源与设置">
+        <svg viewBox="0 0 24 24"><path d="M19.1 12.9c0-.3.1-.6.1-.9s0-.6-.1-.9l2-1.6-2-3.4-2.4 1a7 7 0 0 0-1.6-.9l-.4-2.5h-3.8l-.4 2.5c-.6.2-1.1.6-1.6.9l-2.4-1-2 3.4 2 1.6c0 .3-.1.6-.1.9s0 .6.1.9l-2 1.6 2 3.4 2.4-1c.5.4 1 .7 1.6.9l.4 2.5h3.8l.4-2.5c.6-.2 1.1-.5 1.6-.9l2.4 1 2-3.4zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+        <span class="nav-text">数据源与设置</span>
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="foot-txt" id="storeStatus">本地存储就绪</span>
+      <div class="skin-row" id="skinRow"></div>
+      <button class="icon-btn" id="btnTheme" type="button" title="深色 / 浅色">&#9789;</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="main-scroll">
+
+      <section class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="crumb">DASHBOARD</div>
+            <h1>总览看板</h1>
+            <div class="sub" id="dsLine">—</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn" data-act="goto" data-view="data">打开数据总表</button>
+            <button class="btn primary" data-act="newTask">＋ 新建待办</button>
+          </div>
+        </div>
+        <div class="grid grid-4" id="kpiCards" style="margin-bottom:16px"></div>
+        <div class="grid grid-2" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-title">一级行业 · 优爆品数<span class="link" data-act="goto" data-view="goals">按行业看目标 →</span></div>
+            <div id="chartIndustry"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">当季度目标完成情况分布</div>
+            <div id="chartRate"></div>
+          </div>
+        </div>
+        <div class="grid grid-3">
+          <div class="card"><div class="card-title">优爆品 TOP10</div><div class="rank" id="rankTop"></div></div>
+          <div class="card"><div class="card-title">今日下降最多</div><div class="rank" id="rankDown"></div></div>
+          <div class="card"><div class="card-title">目标缺口最大</div><div class="rank" id="rankGap"></div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-data">
+        <div class="page-header">
+          <div>
+            <div class="crumb">DATA TABLE</div>
+            <h1>商家数据总表</h1>
+            <div class="sub" id="dataSub">—</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn" data-act="pickCols">列显示</button>
+            <button class="btn" data-act="resetSort">还原原表顺序</button>
+            <button class="btn" data-act="exportData">导出当前视图 CSV</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="search">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+            <input class="input" id="q" placeholder="搜公司 / 商家ID / 行业 / 销售 / 拍档">
+          </div>
+          <select class="select" id="fInd" style="width:auto"><option value="">全部一级行业</option></select>
+          <select class="select" id="fYear" style="width:auto"><option value="">全部服务时长</option></select>
+          <select class="select" id="fSale" style="width:auto"><option value="">全部中供销售</option></select>
+          <select class="select" id="fGold" style="width:auto"><option value="">金品与否</option><option value="Y">仅金品</option><option value="N">仅非金品</option></select>
+        </div>
+        <div class="toolbar" id="quickChips"></div>
+        <div class="tbl-wrap" id="tblWrap"></div>
+        <div class="pager" id="tblFoot">—</div>
+      </section>
+
+      <section class="page" id="page-goals">
+        <div class="page-header">
+          <div>
+            <div class="crumb">GOALS</div>
+            <h1>目标进度</h1>
+            <div class="sub">完成率 = 当前优爆品数 ÷ 参考目标；无目标商家不参与合计与达标率</div>
+          </div>
+          <div class="page-actions">
+            <div class="tabs" id="goalTabs">
+              <button class="active" data-act="goalGroup" data-key="sale">按中供销售</button>
+              <button data-act="goalGroup" data-key="ind1">按一级行业</button>
+              <button data-act="goalGroup" data-key="partner">按供应链拍档</button>
+              <button data-act="goalGroup" data-key="year">按服务时长</button>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-4" id="goalKpi" style="margin-bottom:16px"></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title" id="goalTableTitle">分组进度</div>
+          <div class="tbl-wrap" style="max-height:none" id="goalWrap"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">未达标商家（缺口从大到小）<span class="link" data-act="goto" data-view="data">去总表 →</span></div>
+          <div class="tbl-wrap" style="max-height:420px" id="goalMissWrap"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-chances">
+        <div class="page-header">
+          <div>
+            <div class="crumb">OPPORTUNITIES</div>
+            <h1>升优机会</h1>
+            <div class="sub">按表内推荐字段与渗透缺口自动排序，可一键转成待办</div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="tabs" id="chanceTabs">
+            <button class="active" data-act="chanceTab" data-key="up">推荐升优</button>
+            <button data-act="chanceTab" data-key="ad">投广渗透缺口</button>
+            <button data-act="chanceTab" data-key="p4p">P4P 消耗下滑</button>
+            <button data-act="chanceTab" data-key="zero">零优爆品</button>
+            <button data-act="chanceTab" data-key="below">低于行业均值</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" id="chanceTitle">机会清单</div>
+          <div class="tip" id="chanceDesc" style="margin-bottom:12px"></div>
+          <div class="tbl-wrap" id="chanceWrap"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-tasks">
+        <div class="page-header">
+          <div>
+            <div class="crumb">TASKS</div>
+            <h1>待办任务</h1>
+            <div class="sub" id="taskSummary">—</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn" data-act="exportTasks">导出 CSV</button>
+            <button class="btn primary" data-act="newTask">＋ 新建任务</button>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="search">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.8l-.3-.3a6.5 6.5 0 1 0-.7.7l.3.3v.8l5 5 1.5-1.5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+            <input class="input" id="taskSearch" placeholder="搜索标题 / 商家 / 备注">
+          </div>
+          <div class="tabs" id="taskStatusSeg">
+            <button class="active" data-act="taskStatus" data-status="open">未完成</button>
+            <button data-act="taskStatus" data-status="done">已完成</button>
+            <button data-act="taskStatus" data-status="all">全部</button>
+          </div>
+          <select class="select" id="taskSort" style="width:auto">
+            <option value="due">按到期日</option>
+            <option value="priority">按优先级</option>
+            <option value="updated">按更新时间</option>
+          </select>
+        </div>
+        <div class="card" style="padding:6px 16px"><div class="list" id="taskList"></div></div>
+      </section>
+
+      <section class="page" id="page-ai">
+        <div class="page-header">
+          <div>
+            <div class="crumb">AI</div>
+            <h1>AI 助手</h1>
+            <div class="sub">多供应商：失败自动重试 2 次再降级切换；Key 只存本机</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn" data-act="aiTest">连通性测试</button>
+            <button class="btn" data-act="scrollProviders">配置供应商</button>
+          </div>
+        </div>
+        <div class="grid grid-2" style="align-items:start">
+          <div class="card">
+            <div class="card-title">对话<span class="link" data-act="aiClear">清空</span></div>
+            <div class="chat" id="chatBox"></div>
+            <textarea class="textarea" id="chatInput" placeholder="可问：缺口最大的三家怎么排？（Ctrl+Enter 发送）" style="margin-top:8px"></textarea>
+            <div class="btn-row" style="margin-top:8px">
+              <button class="btn primary" data-act="aiSend">发送</button>
+              <button class="btn" data-act="aiInject">带上当前筛选摘要</button>
+              <span class="tip" id="aiSceneLine"></span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">调用记录<span class="link" data-act="clearUsage">清空</span></div>
+            <div id="usageWrap"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px" id="providersAnchor">
+          <div class="card-title">供应商配置（<span id="providerCount">0</span> 个）</div>
+          <div id="providerList"></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-settings">
+        <div class="page-header">
+          <div>
+            <div class="crumb">DATA SOURCE / SETTINGS</div>
+            <h1>数据源与设置</h1>
+            <div class="sub">页面全部本地运行；重新导入表格即可换新数据</div>
+          </div>
+        </div>
+        <div class="grid grid-2" style="align-items:start">
+          <div class="card">
+            <div class="card-title">当前数据源自检</div>
+            <div id="srcInfo" class="tip">—</div>
+            <div class="btn-row" style="margin-top:12px">
+              <button class="btn primary" data-act="verify">校验数值合计</button>
+              <button class="btn" data-act="importData">导入新表格</button>
+              <button class="btn" data-act="resetData">恢复内置数据</button>
+            </div>
+            <div class="hr"></div>
+            <div class="card-title">字段分组概览</div>
+            <div id="groupInfo" class="tip">—</div>
+          </div>
+          <div class="card">
+            <div class="card-title">外观与本地数据</div>
+            <div class="form-grid">
+              <div class="field"><label>工作台名称</label><input class="input" id="setName"></div>
+              <div class="field"><label>Logo 文字</label><input class="input" id="setLogo" maxlength="2"></div>
+            </div>
+            <div class="field"><label>配色皮肤</label><div class="skin-row" id="skinRow2" style="gap:8px"></div></div>
+            <label class="check"><input type="checkbox" id="setDark">深色模式</label>
+            <div class="hr"></div>
+            <div class="tip" id="dataStats">—</div>
+            <div class="btn-row" style="margin-top:10px">
+              <button class="btn primary" data-act="saveSettings">保存设置</button>
+              <button class="btn" data-act="exportAll">备份待办/笔记</button>
+              <button class="btn danger" data-act="clearAll">清空待办/笔记</button>
+            </div>
+            <div class="hr"></div>
+            <div class="tip" id="storeDetail">—</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div style="flex:1;min-width:0">
+      <h2 id="drawerTitle">—</h2>
+      <div class="tip mono" id="drawerId">—</div>
+    </div>
+    <button class="btn ghost sm" data-act="closeDrawer" type="button">✕ 关闭</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-foot">
+    <button class="btn primary" data-act="drawerTask" type="button">＋ 建待办</button>
+    <button class="btn" data-act="drawerNote" type="button">✎ 记跟进</button>
+    <button class="btn" data-act="drawerAsk" type="button">✦ 问 AI</button>
+    <button class="btn" data-act="drawerCopy" type="button">⧉ 复制摘要</button>
+  </div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal" id="modal">
+    <div class="modal-head"><h2 id="modalTitle">标题</h2>
+      <button class="btn ghost sm" data-act="closeModal" type="button">✕ 关闭</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+<div id="toast"></div>
+<input type="file" id="filePick" hidden>
+<script src="ops-data.js"></script>
+<script src="xlsx.bundle.js"></script>
+
+<script>
+/* ==========================================================================
+   运营工作台 · 数据核心 = 国际站商家优爆品表（ops-data.js 内置 / 可重新导入）
+   · 取值一律按列名 -> 索引访问，与 Excel 单元格一一对应
+   · 排序：数值按数值、空值恒排末位、中文按拼音、服务时长按自然序、可还原原表顺序
+   ========================================================================== */
+(function(){
+  "use strict";
+
+  var P = "df_ops_workbench_";
+  var K = {
+    settings: P+"settings_v1", tasks: P+"tasks_v1", notes: P+"notes_v1",
+    providers: P+"ai_providers_v1", usage: P+"ai_usage_v1", chat: P+"ai_chat_v1",
+    data: P+"dataset_v1"
+  };
+  var _lsOk = true, _warned = false, _mem = {};
+  function lsGet(k){
+    try { var v = localStorage.getItem(k); _lsOk = true; return v; }
+    catch(e){ _lsOk = false; return Object.prototype.hasOwnProperty.call(_mem,k) ? _mem[k] : null; }
+  }
+  function lsSet(k, v){
+    try { localStorage.setItem(k, v); _lsOk = true; _mem[k] = v; return true; }
+    catch(e){ _lsOk = false; _mem[k] = v; return false; }
+  }
+  function read(k, fb){
+    var raw = lsGet(k);
+    if(raw === null || raw === undefined) return fb;
+    try { var d = JSON.parse(raw); return (d === null || d === undefined) ? fb : d; }
+    catch(e){ return fb; }
+  }
+  function save(k, v){ try { lsSet(k, JSON.stringify(v)); } catch(e){} if(!_lsOk) warnStore(); }
+  function warnStore(){
+    if(_lsOk || _warned) return;
+    _warned = true;
+    setTimeout(function(){ toast("浏览器禁用了本地存储，改动仅在本页有效，请用「启动本地服务器.bat」打开"); }, 600);
+  }
+
+  function $(s){ return document.querySelector(s); }
+  function $all(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
+  function esc(s){
+    return (s === null || s === undefined ? "" : String(s)).replace(/[&<>"']/g, function(m){
+      return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]);
+    });
+  }
+  function uid(){ return "t" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function toast(msg){
+    var t = $("#toast"); if(!t) return;
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._t); t._t = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+  }
+  function isNum(v){ return typeof v === "number" && isFinite(v); }
+  function isBlank(v){ return v === null || v === undefined || v === ""; }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  }
+  function fmtDateTime(ts){
+    if(!ts) return "—";
+    var d = new Date(ts); if(isNaN(d.getTime())) return String(ts);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")
+      +" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  function nfmt(v, dp){
+    if(!isNum(v)) return String(v === null || v === undefined ? "" : v);
+    if(dp === undefined) return v.toLocaleString("zh-CN");
+    return v.toLocaleString("zh-CN", { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  }
+  function dateFromYMD(n){
+    var s = String(n);
+    return /^\d{8}$/.test(s) ? (s.slice(0,4) + "-" + s.slice(4,6) + "-" + s.slice(6,8)) : s;
+  }
+  function downloadText(name, text, mime){
+    try{
+      var blob = new Blob(["\uFEFF" + text], { type:(mime || "text/plain") + ";charset=utf-8" });
+      var url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+      toast("已导出 " + name);
+    }catch(e){ toast("导出失败：" + ((e && e.message) || e)); }
+  }
+  function toCSV(rows){
+    return rows.map(function(r){
+      return r.map(function(c){
+        var s = (c === null || c === undefined) ? "" : String(c).replace(/"/g, '""');
+        return /[",\n]/.test(s) ? '"' + s + '"' : s;
+      }).join(",");
+    }).join("\r\n");
+  }
+
+  /* ---------------- 数据集装载 ---------------- */
+  var BASE = window.OPS_DATA || { meta:{ source:"(未加载 ops-data.js)", rows:0, cols:0 }, cols:[], rows:[] };
+  var savedDs = read(K.data, null);
+  var DS = (savedDs && savedDs.rows && savedDs.cols) ? savedDs : BASE;
+  var COLIDX = {}, COLMETA = {};
+  function indexDataset(){
+    COLIDX = {}; COLMETA = {};
+    DS.cols.forEach(function(c){ COLIDX[c.label] = c.i; COLMETA[c.label] = c; });
+  }
+  indexDataset();
+
+  /* 常用列名（与原表表头逐字一致） */
+  var L = {
+    id:"admin_mbr_id", name:"公司名称", gold:"是否金品",
+    ind1:"商家一级行业中文", ind2:"商家二级行业中文", ind3:"商家三级行业中文", ind4:"商家四级行业中文",
+    start:"最近1次新签服务开始时间", months:"距今服务月数", yearCls:"服务时长分类",
+    hot:"当前优爆品数", dod:"当前优爆品数(日环比)", wow:"当前优爆品数(周同比)",
+    qTarget:"当季度参考目标", yTarget:"全年参考目标",
+    hotTrd:"当前交易优爆品数", hotBiz:"当前商机优爆品数", boom:"当前爆品数",
+    online:"在线商品数", score45:"4.5分品数", trad:"交易品数", biz:"商机品数",
+    low:"当前低质品数", norm:"当前普通品数", poten:"当前潜力优品数", goodNoBoom:"当前优品_非爆品数",
+    recUp:"推荐升优品数", recAd:"推荐投广品数", adOn:"推广品数", adRate:"推荐投广品推广渗透率",
+    p4pM:"本月累计至当前P4P消耗", p4pL:"上月累计至同日P4P消耗", p4pD:"P4P环比上月增额",
+    sale:"中供销售姓名", partner:"供应链拍档", pSale:"拍档销售", pCs:"拍档客服",
+    hot331:"0331优爆品数", grow331:"当前较0331优爆品数增幅",
+    avg2:"均值_二级行业", med2:"中位值_二级行业", top10pct2:"前10%_二级行业"
+  };
+  function cell(row, label){
+    var i = COLIDX[label];
+    return (i === undefined) ? null : row[i-1];
+  }
+  function colType(label){ var m = COLMETA[label]; return m ? m.type : "text"; }
+
+  /* ---------------- 派生列 ---------------- */
+  function rateQ(row){ var t = cell(row, L.qTarget); return (isNum(t) && t > 0) ? cell(row, L.hot) / t : null; }
+  function rateY(row){ var t = cell(row, L.yTarget); return (isNum(t) && t > 0) ? cell(row, L.hot) / t : null; }
+  function gapQ(row){ var t = cell(row, L.qTarget); return isNum(t) ? Math.max(0, t - cell(row, L.hot)) : null; }
+  function adGap(row){
+    var r = cell(row, L.recAd), a = cell(row, L.adOn);
+    return (isNum(r) && isNum(a)) ? Math.max(0, r - a) : null;
+  }
+  var DERIVED = [
+    { key:"_rateQ", label:"当季完成率", type:"ratio", get:rateQ, note:"当前优爆品数 ÷ 当季度参考目标" },
+    { key:"_gapQ",  label:"当季缺口",   type:"int",   get:gapQ,  note:"max(0, 当季度参考目标 − 当前优爆品数)" },
+    { key:"_rateY", label:"全年完成率", type:"ratio", get:rateY, note:"当前优爆品数 ÷ 全年参考目标" },
+    { key:"_adGap", label:"投广缺口",   type:"int",   get:adGap, note:"max(0, 推荐投广品数 − 推广品数)" }
+  ];
+  var DERMAP = {};
+  DERIVED.forEach(function(d){ DERMAP[d.key] = d; });
+
+  /* ---------------- 排序 ---------------- */
+  var YEAR_RANK = { "首年":0, "次年":1, "第3年":2, "第4年":3, "第5年":4, "第6年及以上":5 };
+  function yearRank(v){
+    if(isBlank(v)) return null;
+    var s = String(v);
+    if(YEAR_RANK[s] !== undefined) return YEAR_RANK[s];
+    var m = s.match(/(\d+)/);
+    if(!m) return null;
+    var n = Number(m[1]);
+    return n >= 6 ? 5.9 : n;
+  }
+  function rawOf(row, key){ return DERMAP[key] ? DERMAP[key].get(row) : cell(row, key); }
+  function typeOf(key){ return DERMAP[key] ? DERMAP[key].type : colType(key); }
+  function sortKey(row, key){
+    var v = rawOf(row, key), t = typeOf(key);
+    if(isBlank(v)) return null;
+    if(t === "rank"){ var r = yearRank(v); return r === null ? null : r; }
+    if(t === "yn") return v === "Y" ? 0 : 1;
+    if(isNum(v)) return v;
+    return String(v);
+  }
+  function tieBreak(a, b){
+    var na = String(cell(a, L.name) || ""), nb = String(cell(b, L.name) || "");
+    var c = na.localeCompare(nb, "zh-Hans-CN");
+    return c ? c : (a.__n - b.__n);
+  }
+  function comparator(key, dir){
+    var sign = dir === "asc" ? 1 : -1;
+    if(key === "__row") return function(a, b){ return (a.__n - b.__n) * sign; };
+    return function(a, b){
+      var ka = sortKey(a, key), kb = sortKey(b, key);
+      var ea = (ka === null || ka === undefined), eb = (kb === null || kb === undefined);
+      if(ea && eb) return tieBreak(a, b);
+      if(ea) return 1;
+      if(eb) return -1;
+      var c;
+      if(typeof ka === "number" && typeof kb === "number") c = ka - kb;
+      else if(typeof ka === "number") c = -1;
+      else if(typeof kb === "number") c = 1;
+      else c = String(ka).localeCompare(String(kb), "zh-Hans-CN");
+      return c ? c * sign : tieBreak(a, b);
+    };
+  }
+
+  /* ---------------- 视图状态 ---------------- */
+  var DEFAULT_SHOW = [L.name, L.gold, L.ind1, L.yearCls, L.hot, L.dod, L.wow, L.qTarget,
+                      "_rateQ", L.yTarget, "_gapQ", L.poten, L.recUp, L.sale, L.p4pM];
+  var settings = Object.assign({ name:"运营工作台", logo:"运", skin:"teal", dark:false, collapsed:false, visible:null },
+                               read(K.settings, {}));
+  var sort = { key:L.hot, dir:"desc" };
+  var filters = { q:"", ind:"", year:"", sale:"", gold:"", quick:"" };
+  var visible = ((settings.visible || []).filter(function(k){ return COLIDX[k] !== undefined || DERMAP[k] !== undefined; }));
+  if(!visible.length) visible = DEFAULT_SHOW.filter(function(k){ return COLIDX[k] !== undefined || DERMAP[k] !== undefined; });
+  if(visible.indexOf(L.name) < 0) visible.unshift(L.name);
+  var view = "dashboard", selected = null;
+  var tasks = read(K.tasks, []); if(!Array.isArray(tasks)) tasks = [];
+  var notes = read(K.notes, {}); if(!notes || typeof notes !== "object") notes = {};
+
+  /* ---------------- 显示格式化（只影响显示，不改原值） ---------------- */
+  function fmtBy(type, v){
+    if(isBlank(v)) return "";
+    if(type === "date") return dateFromYMD(v);
+    if(type === "ratio") return isNum(v) ? (Math.round(v * 1000) / 10) + "%" : String(v);
+    if(type === "money") return isNum(v) ? nfmt(v, 2) : String(v);
+    if(type === "num") return isNum(v) ? nfmt(Math.round(v * 100) / 100, v % 1 === 0 ? 0 : 2) : String(v);
+    if(type === "int") return isNum(v) ? nfmt(v) : String(v);
+    return String(v);
+  }
+  function signedHTML(v, dp){
+    var s = dp ? nfmt(Math.abs(v), dp) : nfmt(Math.abs(v));
+    if(v > 0) return '<span class="pos">+' + s + "</span>";
+    if(v < 0) return '<span class="neg">-' + s + "</span>";
+    return '<span class="dim">' + (dp ? "0.00" : "0") + "</span>";
+  }
+  function fmtCell(key, row){
+    var v = rawOf(row, key), t = typeOf(key);
+    if(isBlank(v)) return '<span class="dim">—</span>';
+    if(key === L.gold) return v === "Y" ? '<span class="badge ok">金品</span>' : '<span class="dim">N</span>';
+    if(key === L.dod || key === L.wow) return signedHTML(v);
+    if(key === L.p4pD) return signedHTML(v, 2);
+    if(key === "_gapQ") return v > 0 ? '<span class="neg">' + nfmt(v) + "</span>" : '<span class="dim">0</span>';
+    if(t === "ratio"){
+      var pct = Math.round(v * 1000) / 10;
+      var cls = "";
+      if(key === "_rateQ") cls = v >= 1 ? "pos" : (v < 0.6 ? "neg" : "");
+      else if(key === "_rateY") cls = v >= 1 ? "pos" : "";
+      else if(v < 0) cls = "neg";
+      return cls ? '<span class="' + cls + '">' + pct + "%</span>" : String(pct) + "%";
+    }
+    if(t === "num" || t === "int" || t === "money") return fmtBy(t, v);
+    return esc(fmtBy(t, v));
+  }
+  function maxAbs(key, list){
+    var m = 0;
+    for(var i = 0; i < list.length; i++){
+      var v = rawOf(list[i], key);
+      if(isNum(v) && Math.abs(v) > m) m = Math.abs(v);
+    }
+    return m;
+  }
+
+  /* ---------------- 筛选 ---------------- */
+  var QUICK = {
+    all:     { label:"全部商家", test:function(){ return true; } },
+    notgoal: { label:"未达当季目标", test:function(r){ var g = gapQ(r); return isNum(g) && g > 0; } },
+    down:    { label:"今日下降", test:function(r){ return isNum(cell(r, L.dod)) && cell(r, L.dod) < 0; } },
+    wdown:   { label:"本周下降", test:function(r){ return isNum(cell(r, L.wow)) && cell(r, L.wow) < 0; } },
+    zero:    { label:"零优爆品", test:function(r){ return cell(r, L.hot) === 0; } },
+    rec:     { label:"有升优推荐", test:function(r){ return isNum(cell(r, L.recUp)) && cell(r, L.recUp) > 0; } },
+    gold:    { label:"金品商家", test:function(r){ return cell(r, L.gold) === "Y"; } },
+    adgap:   { label:"投广有缺口", test:function(r){ var g = adGap(r); return isNum(g) && g > 0; } },
+    nop4p:   { label:"本月零消耗", test:function(r){ return cell(r, L.p4pM) === 0; } }
+  };
+  function matchRow(r){
+    if(filters.quick && QUICK[filters.quick] && !QUICK[filters.quick].test(r)) return false;
+    if(filters.gold && String(cell(r, L.gold)) !== filters.gold) return false;
+    if(filters.ind && String(cell(r, L.ind1) || "") !== filters.ind) return false;
+    if(filters.year && String(cell(r, L.yearCls) || "") !== filters.year) return false;
+    if(filters.sale && String(cell(r, L.sale) || "") !== filters.sale) return false;
+    var q = filters.q.trim().toLowerCase();
+    if(q){
+      var hay = [cell(r,L.name), cell(r,L.id), cell(r,L.ind1), cell(r,L.ind2), cell(r,L.ind3), cell(r,L.ind4),
+                 cell(r,L.sale), cell(r,L.partner), cell(r,L.pSale)].join(" ").toLowerCase();
+      if(hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  }
+  function filtered(){
+    var list = [];
+    for(var i = 0; i < DS.rows.length; i++){
+      DS.rows[i].__n = i;
+      if(matchRow(DS.rows[i])) list.push(DS.rows[i]);
+    }
+    return list;
+  }
+  function currentList(){
+    var list = filtered();
+    if(sort.key) list.sort(comparator(sort.key, sort.dir));
+    return list;
+  }
+
+  /* ---------------- 总表 ---------------- */
+  function thHTML(key){
+    var label = DERMAP[key] ? DERMAP[key].label : key;
+    var t = typeOf(key);
+    var isNumCol = (t !== "text" && t !== "yn" && t !== "rank" && t !== "date");
+    var on = sort.key === key;
+    return '<th class="' + (isNumCol ? "num " : "") + (on ? "sorted " : "") + (key === L.name ? "stick" : "") + '"'
+      + ' data-act="sortBy" data-key="' + esc(key) + '" title="' + esc(DERMAP[key] ? DERMAP[key].note : "点击排序 · " + label) + '">'
+      + esc(label) + '<span class="arw">' + (on ? (sort.dir === "asc" ? "▲" : "▼") : "") + "</span></th>";
+  }
+  function tdHTML(key, row, mx){
+    var t = typeOf(key);
+    var isNumCol = (t !== "text" && t !== "yn" && t !== "rank" && t !== "date");
+    var cls = (isNumCol ? "num " : "") + (key === L.name ? "name stick" : "");
+    var inner = fmtCell(key, row);
+    if(isNum(mx) && mx > 0 && (key === L.hot || key === L.poten || key === L.recUp || key === L.online)){
+      var v = rawOf(row, key);
+      if(isNum(v) && v > 0){
+        inner = '<i style="width:' + Math.max(2, Math.round(v / mx * 100)) + '%"></i><span>' + inner + "</span>";
+        cls += " bar-cell";
+      }
+    }
+    return '<td class="' + cls + '">' + inner + "</td>";
+  }
+  function renderTable(){
+    var wrap = $("#tblWrap"), list = currentList();
+    if(!DS.rows.length){
+      wrap.innerHTML = '<div class="empty"><h3>没有加载到数据</h3><p>确认 ops-data.js 与本文件同目录，或在「数据源与设置」导入表格</p></div>';
+      $("#tblFoot").textContent = "";
+      return;
+    }
+    if(!list.length){
+      wrap.innerHTML = '<div class="empty"><h3>当前筛选没有匹配商家</h3><p>清空搜索词，或把筛选切回「全部」</p></div>';
+    } else {
+      var mx = {};
+      visible.forEach(function(k){ mx[k] = maxAbs(k, list); });
+      wrap.innerHTML = '<table class="dt"><thead><tr>' + visible.map(thHTML).join("") + "</tr></thead><tbody>"
+        + list.map(function(r){
+            return '<tr data-act="openRow" data-n="' + r.__n + '"'
+              + (selected && selected.__n === r.__n ? ' class="sel"' : "") + ">"
+              + visible.map(function(k){ return tdHTML(k, r, mx[k]); }).join("") + "</tr>";
+          }).join("")
+        + "</tbody></table>";
+    }
+    var sumHot = 0;
+    list.forEach(function(r){ var v = cell(r, L.hot); if(isNum(v)) sumHot += v; });
+    var sortName = DERMAP[sort.key] ? DERMAP[sort.key].label : (sort.key === "__row" ? "原表顺序" : sort.key);
+    $("#tblFoot").innerHTML = "筛选出 <b>" + list.length + "</b> / " + DS.rows.length + " 家 · 视图内优爆品合计 <b>"
+      + nfmt(sumHot) + "</b> · 排序 <b>" + esc(sortName) + "</b> " + (sort.dir === "asc" ? "升序" : "降序")
+      + "（空值恒排末位）· 显示 " + visible.length + " / " + DS.cols.length + " 列";
+    $("#dataSub").textContent = "共 " + DS.cols.length + " 列，显示 " + visible.length + " 列 · 点表头排序，点行看全部字段";
+    $("#navCountRows").textContent = list.length;
+  }
+  function fillFilterOptions(){
+    function fill(label, sel){
+      if(!sel) return;
+      var seen = {}, vals = [];
+      DS.rows.forEach(function(r){
+        var v = cell(r, label);
+        if(!isBlank(v) && !seen[v]){ seen[v] = 1; vals.push(String(v)); }
+      });
+      vals.sort(function(a, b){ return a.localeCompare(b, "zh-Hans-CN"); });
+      var keep = sel.value;
+      sel.innerHTML = '<option value="">' + sel.options[0].text + "</option>"
+        + vals.map(function(v){ return '<option value="' + esc(v) + '">' + esc(v) + "</option>"; }).join("");
+      if(keep) sel.value = keep;
+    }
+    fill(L.ind1, $("#fInd")); fill(L.yearCls, $("#fYear")); fill(L.sale, $("#fSale"));
+    $("#quickChips").innerHTML = Object.keys(QUICK).map(function(k){
+      var n = 0;
+      DS.rows.forEach(function(r){ if(QUICK[k].test(r)) n++; });
+      return '<button class="chip' + (filters.quick === k ? " on" : "") + '" type="button" data-act="quick" data-key="'
+        + k + '">' + QUICK[k].label + ' <span style="opacity:.7">' + n + "</span></button>";
+    }).join("");
+  }
+  function pickCols(){
+    var groups = {};
+    DS.cols.forEach(function(c){ (groups[c.group] = groups[c.group] || []).push(c); });
+    var body = '<div class="tip">默认已勾选原表常用列；取消勾选只是不显示，数据本身不受影响。</div>'
+      + '<div class="btn-row" style="margin:10px 0">'
+      + '<button class="btn sm" type="button" data-act="colsDefault">默认列</button>'
+      + '<button class="btn sm" type="button" data-act="colsAllNum">全部数值列</button>'
+      + '<button class="btn sm" type="button" data-act="colsNone">只留公司名</button></div>'
+      + Object.keys(groups).map(function(g){
+          return '<div class="grp"><h3>' + esc(g) + '</h3><div class="btn-row">'
+            + groups[g].map(function(c){
+                return '<label class="check" style="min-width:210px"><input type="checkbox" data-act="colToggle" data-key="'
+                  + esc(c.label) + '"' + (visible.indexOf(c.label) >= 0 ? " checked" : "") + "> " + esc(c.label)
+                  + ' <span class="dim mono">' + c.i + "</span></label>";
+              }).join("")
+            + "</div></div>";
+        }).join("")
+      + '<div class="grp"><h3>派生列（页面计算）</h3><div class="btn-row">'
+      + DERIVED.map(function(d){
+          return '<label class="check" style="min-width:210px"><input type="checkbox" data-act="colToggle" data-key="'
+            + d.key + '"' + (visible.indexOf(d.key) >= 0 ? " checked" : "") + "> " + esc(d.label) + "</label>";
+        }).join("")
+      + "</div></div>";
+    openModal({ title:"列显示（共 " + DS.cols.length + " 列）", body: body, wide:true,
+      buttons:[{ label:"关闭", style:"ghost" }, { label:"应用", style:"primary" }],
+      onOk:function(){
+        var keep = [];
+        $all('#modalBody input[type="checkbox"]').forEach(function(cb){
+          if(cb.checked) keep.push(cb.getAttribute("data-key"));
+        });
+        if(!keep.length){ toast("至少保留一列"); return false; }
+        var order = [];
+        DS.cols.forEach(function(c){ if(keep.indexOf(c.label) >= 0) order.push(c.label); });
+        DERIVED.forEach(function(d){ if(keep.indexOf(d.key) >= 0) order.push(d.key); });
+        if(order.indexOf(L.name) < 0) order.unshift(L.name);
+        visible = order;
+        settings.visible = visible.slice();
+        save(K.settings, settings);
+        renderTable();
+        toast("已显示 " + visible.length + " 列");
+        return true;
+      } });
+  }
+
+  /* ---------------- 商家详情抽屉 ---------------- */
+  function noteKey(row){ return String(cell(row, L.id) || cell(row, L.name) || ""); }
+  function kv(k, valHTML, raw){
+    return '<div class="k">' + esc(k) + '</div><div class="v">' + valHTML
+      + (isBlank(raw) ? "" : '<span class="raw">原值 ' + esc(raw) + "</span>") + "</div>";
+  }
+  function openRow(n){
+    var row = DS.rows[n];
+    if(!row) return;
+    row.__n = n;
+    selected = row;
+    $("#drawerTitle").textContent = String(cell(row, L.name) || "(未命名)");
+    $("#drawerId").textContent = String(cell(row, L.id) || "");
+    var groups = {};
+    DS.cols.forEach(function(c){ (groups[c.group] = groups[c.group] || []).push(c); });
+    var html = '<div class="grp"><h3>关键指标</h3><div class="kv-grid">'
+      + kv(L.hot, fmtCell(L.hot, row), cell(row, L.hot))
+      + kv("当季完成率", fmtCell("_rateQ", row), rateQ(row) === null ? "" : rateQ(row))
+      + kv("当季缺口", fmtCell("_gapQ", row), gapQ(row) === null ? "" : gapQ(row))
+      + kv("全年完成率", fmtCell("_rateY", row), rateY(row) === null ? "" : rateY(row))
+      + "</div></div>";
+    Object.keys(groups).forEach(function(g){
+      html += '<div class="grp"><h3>' + esc(g) + '</h3><div class="kv-grid">'
+        + groups[g].map(function(c){
+            var v = row[c.i - 1];
+            var shown = isBlank(v) ? '<span class="dim">空</span>' : esc(fmtBy(c.type, v));
+            return kv(c.label, shown, isBlank(v) ? "" : String(v));
+          }).join("")
+        + "</div></div>";
+    });
+    html += '<div class="grp"><h3>跟进记录（存本机）</h3><div class="list" id="noteList"></div></div>';
+    $("#drawerBody").innerHTML = html;
+    renderNotes();
+    $("#drawer").classList.add("show");
+    renderTable();
+  }
+  function renderNotes(){
+    var box = $("#noteList");
+    if(!box || !selected) return;
+    var list = notes[noteKey(selected)] || [];
+    box.innerHTML = list.length ? list.map(function(x){
+      return '<div class="row"><div class="grow"><div class="row-note">' + esc(x.text) + "</div>"
+        + '<div class="row-meta">' + fmtDateTime(x.ts) + "</div></div>"
+        + '<div class="rt"><button class="btn ghost sm" type="button" data-act="delNote" data-ts="' + x.ts + '">删</button></div></div>';
+    }).join("") : '<div class="tip">还没有跟进记录，点下方「记跟进」。</div>';
+  }
+  function addNote(){
+    if(!selected){ toast("先打开一个商家"); return; }
+    openModal({ title:"记一条跟进 · " + cell(selected, L.name),
+      body:'<div class="field"><label>内容</label><textarea class="textarea" id="nText" placeholder="沟通结果、下一步…"></textarea></div>',
+      buttons:[{ label:"取消", style:"ghost" }, { label:"保存", style:"primary" }],
+      onOk:function(){
+        var t = ($("#nText").value || "").trim();
+        if(!t){ toast("内容不能为空"); return false; }
+        var k = noteKey(selected);
+        if(!notes[k]) notes[k] = [];
+        notes[k].unshift({ ts: Date.now(), text: t });
+        save(K.notes, notes);
+        renderNotes();
+        toast("已记录");
+        return true;
+      } });
+  }
+  function rowSummaryText(row){
+    return "【" + cell(row, L.name) + "】" + cell(row, L.id)
+      + " · 行业：" + cell(row, L.ind1) + "/" + cell(row, L.ind2)
+      + " · 服务：" + cell(row, L.yearCls) + "（" + cell(row, L.months) + "个月）"
+      + " · 优爆品：" + cell(row, L.hot) + "（日环比 " + cell(row, L.dod) + "，周同比 " + cell(row, L.wow) + "）"
+      + " · 当季目标：" + (isBlank(cell(row, L.qTarget)) ? "无" : cell(row, L.qTarget))
+      + (rateQ(row) === null ? "" : "（完成 " + (Math.round(rateQ(row) * 1000) / 10) + "%）")
+      + " · 在线商品：" + cell(row, L.online) + "，潜力优品：" + cell(row, L.poten)
+      + "，推荐升优：" + cell(row, L.recUp)
+      + " · 推荐投广：" + cell(row, L.recAd) + " / 在推 " + cell(row, L.adOn)
+      + " · 本月P4P消耗：" + (isBlank(cell(row, L.p4pM)) ? "无数据" : cell(row, L.p4pM));
+  }
+
+  /* ---------------- 汇总 ---------------- */
+  function sum(label, list){
+    var s = 0;
+    (list || DS.rows).forEach(function(r){ var v = cell(r, label); if(isNum(v)) s += v; });
+    return s;
+  }
+  function cnt(fn){
+    var n = 0;
+    DS.rows.forEach(function(r){ if(fn(r)) n++; });
+    return n;
+  }
+  function kpiCards(){
+    var withT = cnt(function(r){ return isNum(cell(r, L.qTarget)); });
+    var met = cnt(function(r){ var t = cell(r, L.qTarget); return isNum(t) && cell(r, L.hot) >= t; });
+    var gapSum = sum(L.qTarget) * 0;
+    DS.rows.forEach(function(r){ var g = gapQ(r); if(isNum(g)) gapSum += g; });
+    var tSum = sum(L.qTarget), hSum = sum(L.hot);
+    var z = cnt(function(r){ return cell(r, L.hot) === 0; });
+    return [
+      { k:"商家数", v:nfmt(DS.rows.length), h:"数据源 " + (DS.meta.source || ""), cls:"" },
+      { k:"优爆品总数", v:nfmt(hSum), h:"日环比 " + (sum(L.dod) >= 0 ? "+" : "") + nfmt(sum(L.dod)) + " · 周同比 "
+          + (sum(L.wow) >= 0 ? "+" : "") + nfmt(sum(L.wow)), cls:"accent" },
+      { k:"当季达标家数", v:nfmt(met) + " / " + nfmt(withT), h:"有目标商家中 " + (withT ? Math.round(met / withT * 100) : 0) + "% 已达标", cls:"ok" },
+      { k:"当季缺口合计", v:nfmt(gapSum), h:"目标合计 " + nfmt(tSum) + " · 整体完成 " + (tSum ? Math.round(hSum / tSum * 1000) / 10 : 0) + "%", cls:"warn" },
+      { k:"今日下降商家", v:nfmt(cnt(function(r){ return isNum(cell(r, L.dod)) && cell(r, L.dod) < 0; })),
+        h:"周同比下降 " + nfmt(cnt(function(r){ return isNum(cell(r, L.wow)) && cell(r, L.wow) < 0; })) + " 家", cls:"warn" },
+      { k:"零优爆品商家", v:nfmt(z), h:"占比 " + Math.round(z / DS.rows.length * 100) + "%", cls:"warn" },
+      { k:"推荐升优品合计", v:nfmt(sum(L.recUp)), h:"潜力优品 " + nfmt(sum(L.poten)) + " 个", cls:"accent" },
+      { k:"本月 P4P 消耗", v:nfmt(Math.round(sum(L.p4pM) * 100) / 100, 2),
+        h:"环比 " + (sum(L.p4pD) >= 0 ? "+" : "") + nfmt(Math.round(sum(L.p4pD) * 100) / 100, 2)
+          + " · 有数据 " + nfmt(cnt(function(r){ return isNum(cell(r, L.p4pM)); })) + " 家", cls:"mid" }
+    ];
+  }
+  function renderDashboard(){
+    $("#kpiCards").innerHTML = kpiCards().map(function(c){
+      return '<div class="card stat ' + c.cls + '"><div class="num">' + esc(c.v) + '</div><div class="lbl">'
+        + esc(c.k) + '</div><div class="hint">' + esc(c.h) + "</div></div>";
+    }).join("");
+    $("#dsLine").textContent = "数据源：" + (DS.meta.source || "-") + " · 截至 " + (DS.meta.asOf || "-")
+      + " · " + DS.rows.length + " 家 × " + DS.cols.length + " 列 · 生成于 " + (DS.meta.generatedAt || "-");
+    renderIndustryChart();
+    renderRateChart();
+    renderRanks();
+  }
+  function groupSum(label){
+    var m = {}, order = [];
+    DS.rows.forEach(function(r){
+      var k = String(cell(r, label) || "（空）");
+      if(!m[k]){ m[k] = { name:k, n:0, hot:0, target:0, gap:0 }; order.push(k); }
+      m[k].n++;
+      var h = cell(r, L.hot); if(isNum(h)) m[k].hot += h;
+      var t = cell(r, L.qTarget); if(isNum(t)) m[k].target += t;
+      var g = gapQ(r); if(isNum(g)) m[k].gap += g;
+    });
+    return order.map(function(k){ return m[k]; }).sort(function(a, b){ return b.hot - a.hot; });
+  }
+  function barChart(items, valueKey, unit){
+    if(!items.length) return '<div class="tip">无数据</div>';
+    var w = 560, rowH = 26, pad = 100, h = items.length * rowH + 10, max = 1;
+    items.forEach(function(it){ if(it[valueKey] > max) max = it[valueKey]; });
+    var bw = w - pad - 96;
+    var out = '<svg class="chart" viewBox="0 0 ' + w + " " + h + '" role="img" aria-label="柱状图">';
+    items.forEach(function(it, i){
+      var y = i * rowH + 4;
+      var len = Math.round(it[valueKey] / max * bw);
+      len = Math.max(len, it[valueKey] > 0 ? 2 : 0);
+      out += '<text class="lbl" x="' + (pad - 8) + '" y="' + (y + 13) + '" text-anchor="end">'
+        + esc(String(it.name).slice(0, 9)) + "</text>"
+        + '<rect x="' + pad + '" y="' + (y + 2) + '" width="' + len + '" height="15" rx="3" fill="var(--accent)"></rect>'
+        + '<text class="val" x="' + (pad + len + 6) + '" y="' + (y + 14) + '">' + nfmt(it[valueKey])
+        + (unit ? " " + unit : "") + (valueKey === "hot" ? " · " + it.n + "家" : "") + "</text>";
+    });
+    return out + "</svg>";
+  }
+  function renderIndustryChart(){
+    $("#chartIndustry").innerHTML = barChart(groupSum(L.ind1).slice(0, 10), "hot", "");
+  }
+  function renderRateChart(){
+    var b = [ {name:"≥100% 已达标", n:0}, {name:"80-99%", n:0}, {name:"50-79%", n:0},
+              {name:"1-49%", n:0}, {name:"0%", n:0}, {name:"无参考目标", n:0} ];
+    DS.rows.forEach(function(r){
+      var rt = rateQ(r);
+      if(rt === null) b[5].n++;
+      else if(rt <= 0) b[4].n++;
+      else if(rt < 0.5) b[3].n++;
+      else if(rt < 0.8) b[2].n++;
+      else if(rt < 1) b[1].n++;
+      else b[0].n++;
+    });
+    $("#chartRate").innerHTML = barChart(b, "n", "家");
+  }
+  function rankList(sel, list, valFn, signed){
+    var box = $(sel);
+    if(!box) return;
+    if(!list.length){ box.innerHTML = '<div class="tip">没有符合条件的商家</div>'; return; }
+    box.innerHTML = list.map(function(r, i){
+      var v = valFn(r), cls = "";
+      if(signed && isNum(v)) cls = v < 0 ? "neg" : (v > 0 ? "pos" : "");
+      var txt = (v === null || v === undefined || v === "") ? "—" : (isNum(v) ? nfmt(v) : String(v));
+      return '<div class="r" data-act="openRow" data-n="' + r.__n + '"><span class="no">' + (i + 1) + "</span>"
+        + '<span class="nm">' + esc(cell(r, L.name)) + '</span><span class="vv ' + cls + '">' + esc(txt) + "</span></div>";
+    }).join("");
+  }
+  function renderRanks(){
+    var rows = DS.rows.map(function(r, i){ r.__n = i; return r; });
+    rankList("#rankTop", rows.slice().sort(function(a, b){ return (cell(b, L.hot) || 0) - (cell(a, L.hot) || 0); }).slice(0, 10),
+      function(r){ return cell(r, L.hot); }, false);
+    rankList("#rankDown", rows.filter(function(r){ return isNum(cell(r, L.dod)) && cell(r, L.dod) < 0; })
+      .sort(function(a, b){ return cell(a, L.dod) - cell(b, L.dod); }).slice(0, 10),
+      function(r){ return cell(r, L.dod); }, true);
+    rankList("#rankGap", rows.filter(function(r){ var g = gapQ(r); return isNum(g) && g > 0; })
+      .sort(function(a, b){ return gapQ(b) - gapQ(a); }).slice(0, 10),
+      function(r){ return gapQ(r); }, false);
+  }
+
+  /* ---------------- 目标进度 ---------------- */
+  var goalGroupKey = "sale";
+  function goalLabel(){
+    return goalGroupKey === "sale" ? L.sale : goalGroupKey === "ind1" ? L.ind1
+         : goalGroupKey === "partner" ? L.partner : L.yearCls;
+  }
+  function renderGoals(){
+    var label = goalLabel(), m = {}, order = [];
+    DS.rows.forEach(function(r){
+      var k = String(cell(r, label) || "（空）");
+      if(!m[k]){ m[k] = { name:k, n:0, withT:0, met:0, hot:0, target:0, gap:0 }; order.push(k); }
+      var g = m[k];
+      g.n++;
+      var h = cell(r, L.hot); if(isNum(h)) g.hot += h;
+      var t = cell(r, L.qTarget);
+      if(isNum(t)){ g.withT++; g.target += t; if(isNum(h) && h >= t) g.met++; }
+      var gp = gapQ(r); if(isNum(gp)) g.gap += gp;
+    });
+    var list = order.map(function(k){
+      var g = m[k];
+      g.rate = g.target ? g.hot / g.target : null;
+      return g;
+    }).sort(function(a, b){ return (b.gap - a.gap) || (b.hot - a.hot); });
+    var tot = { n:0, withT:0, met:0, hot:0, target:0, gap:0 };
+    list.forEach(function(g){ tot.n += g.n; tot.withT += g.withT; tot.met += g.met; tot.hot += g.hot; tot.target += g.target; tot.gap += g.gap; });
+    $("#goalKpi").innerHTML = [
+      { k:"分组数", v:nfmt(list.length), h:"当前分组：" + label, cls:"" },
+      { k:"有当季目标商家", v:nfmt(tot.withT), h:"目标合计 " + nfmt(tot.target) + " 个优爆品", cls:"" },
+      { k:"达标商家", v:nfmt(tot.met), h:"达标率 " + (tot.withT ? Math.round(tot.met / tot.withT * 100) : 0) + "%", cls:"ok" },
+      { k:"缺口合计", v:nfmt(tot.gap), h:"整体完成率 " + (tot.target ? Math.round(tot.hot / tot.target * 1000) / 10 : 0) + "%", cls:"warn" }
+    ].map(function(c){
+      return '<div class="card stat ' + c.cls + '"><div class="num">' + esc(c.v) + '</div><div class="lbl">' + esc(c.k)
+        + '</div><div class="hint">' + esc(c.h) + "</div></div>";
+    }).join("");
+    $("#goalTableTitle").textContent = "按「" + label + "」聚合（缺口从大到小）";
+    $("#goalWrap").innerHTML = '<table class="dt"><thead><tr><th>' + esc(label)
+      + '</th><th class="num">商家数</th><th class="num">有目标</th><th class="num">达标</th><th class="num">优爆品</th>'
+      + '<th class="num">目标</th><th class="num">完成率</th><th class="num">缺口</th></tr></thead><tbody>'
+      + list.map(function(g){
+          var rate = g.rate === null ? '<span class="dim">—</span>'
+            : '<span class="' + (g.rate >= 1 ? "pos" : (g.rate < 0.6 ? "neg" : "")) + '">' + Math.round(g.rate * 1000) / 10 + "%</span>";
+          return "<tr><td>" + esc(g.name) + '</td><td class="num">' + nfmt(g.n) + '</td><td class="num">' + nfmt(g.withT)
+            + '</td><td class="num">' + nfmt(g.met) + '</td><td class="num">' + nfmt(g.hot) + '</td><td class="num">' + nfmt(g.target)
+            + '</td><td class="num">' + rate + '</td><td class="num">'
+            + (g.gap ? '<span class="neg">' + nfmt(g.gap) + "</span>" : '<span class="dim">0</span>') + "</td></tr>";
+        }).join("")
+      + "</tbody></table>";
+    var miss = DS.rows.map(function(r, i){ r.__n = i; return r; })
+      .filter(function(r){ var g = gapQ(r); return isNum(g) && g > 0; })
+      .sort(function(a, b){ return gapQ(b) - gapQ(a); });
+    var cols = [L.name, L.sale, L.yearCls, L.hot, L.qTarget, "_rateQ", "_gapQ", L.dod, L.recUp];
+    $("#goalMissWrap").innerHTML = miss.length
+      ? '<table class="dt"><thead><tr>' + cols.map(function(k){
+          return '<th class="num">' + esc(DERMAP[k] ? DERMAP[k].label : k) + "</th>";
+        }).join("") + "</tr></thead><tbody>"
+        + miss.slice(0, 60).map(function(r){
+            return '<tr data-act="openRow" data-n="' + r.__n + '">' + cols.map(function(k){
+              return '<td class="num">' + fmtCell(k, r) + "</td>";
+            }).join("") + "</tr>";
+          }).join("")
+        + "</tbody></table><div class='pager'>未达标 " + nfmt(miss.length) + " 家，显示缺口最大的 "
+        + Math.min(60, miss.length) + " 家</div>"
+      : '<div class="empty"><h3>全部达标</h3><p>当前没有缺口商家</p></div>';
+  }
+
+  /* ---------------- 升优机会 ---------------- */
+  var chanceKey = "up";
+  var CHANCE = {
+    up:  { title:"推荐升优清单", desc:"按表内「推荐升优品数」从多到少，这些商家有最多被判定接近升优的商品。",
+      cols:[L.name, L.ind1, L.recUp, L.poten, L.hot, "_rateQ", L.online, L.sale],
+      filter:function(r){ return isNum(cell(r, L.recUp)) && cell(r, L.recUp) > 0; },
+      sortFn:function(a, b){ return cell(b, L.recUp) - cell(a, L.recUp); },
+      task:function(r){ return "跟进 " + cell(r, L.name) + "：处理 " + cell(r, L.recUp) + " 个推荐升优商品（补信息质量分 / 后验指标）"; } },
+    ad:  { title:"投广渗透缺口", desc:"推荐投广品数与在推品数之差，缺口越大代表可放量空间越大。",
+      cols:[L.name, L.sale, L.recAd, L.adOn, "_adGap", L.adRate, L.hot, L.p4pM],
+      filter:function(r){ var g = adGap(r); return isNum(g) && g > 0; },
+      sortFn:function(a, b){ return adGap(b) - adGap(a); },
+      task:function(r){ return "跟进 " + cell(r, L.name) + "：推荐投广 " + cell(r, L.recAd) + "，在推 " + cell(r, L.adOn) + "，补投 " + adGap(r) + " 个"; } },
+    p4p: { title:"P4P 消耗下滑", desc:"本月累计消耗低于上月同日的商家，按降幅从大到小（原表 P4P 三列仅部分商家有值）。",
+      cols:[L.name, L.sale, L.p4pM, L.p4pL, L.p4pD, L.hot, L.adOn],
+      filter:function(r){ return isNum(cell(r, L.p4pD)) && cell(r, L.p4pD) < 0; },
+      sortFn:function(a, b){ return cell(a, L.p4pD) - cell(b, L.p4pD); },
+      task:function(r){ return "跟进 " + cell(r, L.name) + "：P4P 比上月同期少投 " + nfmt(Math.abs(cell(r, L.p4pD)), 2) + "，排查预算与出价"; } },
+    zero:{ title:"零优爆品商家", desc:"当前优爆品数为 0，属于结构性短板，优先做商品结构梳理。",
+      cols:[L.name, L.ind1, L.yearCls, L.online, L.poten, L.recUp, L.qTarget, L.sale],
+      filter:function(r){ return cell(r, L.hot) === 0; },
+      sortFn:function(a, b){ return (cell(b, L.poten) || 0) - (cell(a, L.poten) || 0); },
+      task:function(r){ return "跟进 " + cell(r, L.name) + "：0 优爆品，先从 " + cell(r, L.poten) + " 个潜力优品里挑 10 个升级"; } },
+    below:{ title:"低于二级行业均值", desc:"当前优爆品数低于同二级行业均值，按与均值的差距排序。",
+      cols:[L.name, L.ind2, L.hot, L.avg2, L.med2, L.top10pct2, L.sale],
+      filter:function(r){ var a = cell(r, L.avg2), h = cell(r, L.hot); return isNum(a) && isNum(h) && h < a; },
+      sortFn:function(a, b){ return (cell(b, L.avg2) - cell(b, L.hot)) - (cell(a, L.avg2) - cell(a, L.hot)); },
+      task:function(r){ return "跟进 " + cell(r, L.name) + "：优爆品 " + cell(r, L.hot) + " 低于二级行业均值 "
+          + nfmt(Math.round(cell(r, L.avg2) * 10) / 10, 1) + "，还需 " + nfmt(Math.ceil(cell(r, L.avg2) - cell(r, L.hot))) + " 个"; } }
+  };
+  function renderChances(){
+    var c = CHANCE[chanceKey];
+    var rows = DS.rows.map(function(r, i){ r.__n = i; return r; }).filter(c.filter).sort(c.sortFn);
+    $("#chanceTitle").textContent = c.title + "（" + rows.length + " 家）";
+    $("#chanceDesc").textContent = c.desc;
+    $("#navCountChance").textContent = rows.length;
+    if(!rows.length){ $("#chanceWrap").innerHTML = '<div class="empty"><h3>没有符合条件的商家</h3><p>换一个标签看看</p></div>'; return; }
+    $("#chanceWrap").innerHTML = '<table class="dt"><thead><tr>'
+      + c.cols.map(function(k){ return '<th class="num">' + esc(DERMAP[k] ? DERMAP[k].label : k) + "</th>"; }).join("")
+      + '<th class="num">操作</th></tr></thead><tbody>'
+      + rows.slice(0, 80).map(function(r){
+          return '<tr data-act="openRow" data-n="' + r.__n + '">' + c.cols.map(function(k){
+            return '<td class="num">' + fmtCell(k, r) + "</td>";
+          }).join("") + '<td class="num"><button class="btn sm" type="button" data-act="chanceTask" data-n="'
+            + r.__n + '">转待办</button></td></tr>';
+        }).join("")
+      + "</tbody></table>"
+      + (rows.length > 80 ? '<div class="pager">共 ' + rows.length + " 家，显示前 80 家</div>" : "");
+  }
+  function chanceToTask(n){
+    var r = DS.rows[n];
+    if(!r) return;
+    var c = CHANCE[chanceKey];
+    addTask({ title:c.task(r), merchant:String(cell(r, L.name) || ""), merchantId:noteKey(r),
+      priority:"high", note:"来源：升优机会 · " + c.title });
+    toast("已加入待办");
+  }
+
+  /* ---------------- 待办任务 ---------------- */
+  var taskFilter = { q:"", status:"open", sort:"due" };
+  function addTask(o){
+    tasks.unshift(Object.assign({ id:uid(), status:"todo", priority:"mid", createdAt:Date.now(),
+      updatedAt:Date.now(), doneAt:null, merchant:"", merchantId:"", due:"", note:"" }, o));
+    save(K.tasks, tasks);
+    renderTasks();
+    updateCounts();
+  }
+  function taskForm(prefill, id){
+    var t = id ? tasks.find(function(x){ return x.id === id; }) : null;
+    var d = t || Object.assign({ title:"", merchant:"", due:"", priority:"mid", status:"todo", note:"" }, prefill || {});
+    openModal({
+      title: t ? "编辑任务" : "新建任务",
+      body:'<div class="form-grid">'
+        + '<div class="field full"><label>任务标题 *</label><input class="input" id="tfTitle" value="' + esc(d.title) + '" placeholder="要做什么"></div>'
+        + '<div class="field"><label>关联商家</label><input class="input" id="tfMerchant" value="' + esc(d.merchant) + '" list="merchantList" placeholder="公司名，可留空"></div>'
+        + '<div class="field"><label>到期日</label><input class="input" type="date" id="tfDue" value="' + esc(d.due || "") + '"></div>'
+        + '<div class="field"><label>优先级</label><select class="select" id="tfPriority">'
+        + '<option value="high"' + (d.priority === "high" ? " selected" : "") + '>高</option>'
+        + '<option value="mid"' + (d.priority === "mid" ? " selected" : "") + '>中</option>'
+        + '<option value="low"' + (d.priority === "low" ? " selected" : "") + '>低</option></select></div>'
+        + '<div class="field"><label>状态</label><select class="select" id="tfStatus">'
+        + '<option value="todo"' + (d.status === "todo" ? " selected" : "") + '>待办</option>'
+        + '<option value="doing"' + (d.status === "doing" ? " selected" : "") + '>进行中</option>'
+        + '<option value="done"' + (d.status === "done" ? " selected" : "") + '>已完成</option></select></div>'
+        + '<div class="field full"><label>备注</label><textarea class="textarea" id="tfNote" placeholder="数据依据、下一步动作…">' + esc(d.note || "") + "</textarea></div>"
+        + "</div>"
+        + '<datalist id="merchantList">' + DS.rows.map(function(r){
+            return '<option value="' + esc(cell(r, L.name)) + '"></option>';
+          }).join("") + "</datalist>",
+      buttons:[{ label:"取消", style:"ghost" }, { label:"保存", style:"primary" }],
+      onOk:function(){
+        var title = ($("#tfTitle").value || "").trim();
+        if(!title){ toast("请填写任务标题"); return false; }
+        var st = $("#tfStatus").value;
+        var obj = t || { id:uid(), createdAt:Date.now(), merchantId:d.merchantId || "" };
+        obj.title = title;
+        obj.merchant = ($("#tfMerchant").value || "").trim();
+        obj.due = $("#tfDue").value || "";
+        obj.priority = $("#tfPriority").value;
+        obj.status = st;
+        obj.note = ($("#tfNote").value || "").trim();
+        obj.updatedAt = Date.now();
+        obj.doneAt = st === "done" ? (obj.doneAt || Date.now()) : null;
+        if(t) tasks = tasks.map(function(x){ return x.id === t.id ? obj : x; });
+        else tasks.unshift(obj);
+        save(K.tasks, tasks);
+        renderTasks();
+        updateCounts();
+        toast(t ? "已更新" : "已新建任务");
+        return true;
+      }
+    });
+  }
+  function taskMatch(t){
+    if(taskFilter.status === "open" && t.status === "done") return false;
+    if(taskFilter.status === "done" && t.status !== "done") return false;
+    var q = taskFilter.q.trim().toLowerCase();
+    if(q && [t.title, t.merchant, t.note].join(" ").toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  }
+  function renderTasks(){
+    var PR = { high:0, mid:1, low:2 };
+    var list = tasks.filter(taskMatch).sort(function(a, b){
+      if(a.status !== b.status) return a.status === "done" ? 1 : -1;
+      if(taskFilter.sort === "priority"){
+        var d = (PR[a.priority] === undefined ? 1 : PR[a.priority]) - (PR[b.priority] === undefined ? 1 : PR[b.priority]);
+        if(d) return d;
+      }
+      if(taskFilter.sort === "updated") return (b.updatedAt || 0) - (a.updatedAt || 0);
+      var da = a.due || "9999-12-31", db = b.due || "9999-12-31";
+      return da < db ? -1 : (da > db ? 1 : 0);
+    });
+    var open = tasks.filter(function(t){ return t.status !== "done"; }).length;
+    $("#taskSummary").textContent = "共 " + tasks.length + " 项：未完成 " + open + " · 已完成 " + (tasks.length - open);
+    var box = $("#taskList");
+    if(!tasks.length){
+      box.innerHTML = '<div class="empty"><h3>还没有任务</h3><p>可直接新建，或在「升优机会 / 商家详情」里一键转待办</p></div>';
+      return;
+    }
+    if(!list.length){
+      box.innerHTML = '<div class="empty"><h3>当前筛选没有匹配项</h3><p>切到「已完成」或「全部」看看</p></div>';
+      return;
+    }
+    box.innerHTML = list.map(function(t){
+      var overdue = t.status !== "done" && t.due && t.due < todayStr();
+      return '<div class="row"><button class="tick' + (t.status === "done" ? " on" : "") + '" type="button" '
+        + 'data-act="toggleTask" data-id="' + t.id + '">✓</button><div class="grow">'
+        + '<div class="row-title' + (t.status === "done" ? " done" : "") + '">' + esc(t.title) + "</div>"
+        + '<div class="row-meta">'
+        + (t.due ? '<span class="badge ' + (overdue ? "high" : (t.due === todayStr() ? "doing" : "plain")) + '">'
+            + (overdue ? "逾期 " : "") + esc(t.due.slice(5)) + "</span>" : "")
+        + '<span class="badge ' + (t.priority === "high" ? "high" : (t.priority === "low" ? "" : "mid")) + '">'
+        + ({ high:"高", mid:"中", low:"低" }[t.priority] || "中") + "</span>"
+        + (t.status === "doing" ? '<span class="badge doing">进行中</span>' : "")
+        + (t.merchant ? '<span class="badge plain">' + esc(t.merchant) + "</span>" : "")
+        + "</div>"
+        + (t.note ? '<div class="row-note">' + esc(t.note) + "</div>" : "")
+        + '</div><div class="rt">'
+        + (t.status === "done" ? "" : '<button class="btn ghost sm" type="button" data-act="startTask" data-id="' + t.id + '">开始</button>')
+        + '<button class="btn ghost sm" type="button" data-act="editTask" data-id="' + t.id + '">编辑</button>'
+        + '<button class="btn ghost sm" type="button" data-act="delTask" data-id="' + t.id + '">删除</button>'
+        + "</div></div>";
+    }).join("");
+  }
+  function toggleTask(id){
+    var t = tasks.find(function(x){ return x.id === id; });
+    if(!t) return;
+    t.status = t.status === "done" ? "todo" : "done";
+    t.doneAt = t.status === "done" ? Date.now() : null;
+    t.updatedAt = Date.now();
+    save(K.tasks, tasks);
+    renderTasks();
+    updateCounts();
+    toast(t.status === "done" && taskFilter.status === "open" ? "已完成，切到「已完成」可查看" : (t.status === "done" ? "已完成" : "已重新打开"));
+  }
+  function exportTasks(){
+    if(!tasks.length){ toast("没有任务可导出"); return; }
+    var rows = [["标题","关联商家","状态","优先级","到期日","备注","创建时间","完成时间"]];
+    tasks.forEach(function(t){
+      rows.push([t.title, t.merchant || "", ({todo:"待办",doing:"进行中",done:"已完成"}[t.status] || t.status),
+        ({high:"高",mid:"中",low:"低"}[t.priority] || ""), t.due || "", t.note || "",
+        fmtDateTime(t.createdAt), t.doneAt ? fmtDateTime(t.doneAt) : ""]);
+    });
+    downloadText("运营待办-" + todayStr() + ".csv", toCSV(rows), "text/csv");
+  }
+
+  /* ---------------- AI 多供应商 ---------------- */
+  var PROVIDERS = {
+    qwen:     { label:"千问（阿里云百炼）", apiBase:"https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", text:"qwen-plus" },
+    zhipu:    { label:"智谱 AI（GLM）", apiBase:"https://open.bigmodel.cn/api/paas/v4/chat/completions", text:"glm-4-flash" },
+    tencent:  { label:"腾讯混元", apiBase:"https://api.hunyuan.cloud.tencent.com/v1/chat/completions", text:"hunyuan-lite" },
+    deepseek: { label:"DeepSeek", apiBase:"https://api.deepseek.com/v1/chat/completions", text:"deepseek-chat" },
+    moonshot: { label:"Kimi（月之暗面）", apiBase:"https://api.moonshot.cn/v1/chat/completions", text:"moonshot-v1-8k" },
+    custom:   { label:"自定义（OpenAI 兼容）", apiBase:"", text:"" }
+  };
+  var aiProviders = read(K.providers, null);
+  if(!Array.isArray(aiProviders) || !aiProviders.length){
+    aiProviders = Object.keys(PROVIDERS).map(function(id){
+      return { id:id, label:PROVIDERS[id].label, apiBase:PROVIDERS[id].apiBase, apiKey:"",
+        textModel:PROVIDERS[id].text, enabled: id === "qwen" || id === "custom" };
+    });
+    save(K.providers, aiProviders);
+  }
+  var aiUsage = read(K.usage, []); if(!Array.isArray(aiUsage)) aiUsage = [];
+  var chatMsgs = read(K.chat, []); if(!Array.isArray(chatMsgs)) chatMsgs = [];
+  function saveProviders(){ save(K.providers, aiProviders); }
+  function activeProvider(){
+    var ok = aiProviders.filter(function(p){ return p.enabled && p.apiKey; });
+    return ok.length ? ok[0] : null;
+  }
+  function nextProvider(afterId){
+    var idx = -1;
+    aiProviders.forEach(function(p, i){ if(p.id === afterId) idx = i; });
+    for(var j = 1; j <= aiProviders.length; j++){
+      var p = aiProviders[(idx + j) % aiProviders.length];
+      if(p.enabled && p.apiKey) return p;
+    }
+    return null;
+  }
+  function tokens(t){
+    if(!t) return 0;
+    var cn = (String(t).match(/[\u4e00-\u9fff]/g) || []).length;
+    return Math.round(cn / 1.5 + (String(t).length - cn) / 4);
+  }
+  function pickContent(j){
+    if(j === null || j === undefined) return "";
+    if(typeof j === "string") return j;
+    var ch = j.choices && j.choices[0];
+    if(ch && ch.message && typeof ch.message.content === "string" && ch.message.content.trim()) return ch.message.content;
+    if(ch && ch.message && Array.isArray(ch.message.content))
+      return ch.message.content.map(function(x){ return (x && x.text) ? x.text : ""; }).join("");
+    if(ch && typeof ch.text === "string") return ch.text;
+    if(j.output && typeof j.output.text === "string") return j.output.text;
+    if(typeof j.content === "string") return j.content;
+    return "";
+  }
+  function usableText(v){
+    var s = String(v === null || v === undefined ? "" : v).trim();
+    return !!(s && !/^\[object /i.test(s) && !/^undefined$/i.test(s));
+  }
+  function aiCall(messages, timeoutMs){
+    timeoutMs = timeoutMs || 90000;
+    return new Promise(function(resolve, reject){
+      var main = activeProvider();
+      if(!main){ reject(new Error("没有已启用且填了 Key 的供应商")); return; }
+      var tried = [];
+      function attempt(provider, retry){
+        var body = { model: provider.textModel, messages: messages, temperature: 0.4 };
+        var init = { method:"POST",
+          headers:{ "Content-Type":"application/json", "Authorization":"Bearer " + provider.apiKey },
+          body: JSON.stringify(body) };
+        var timer = null;
+        if(typeof AbortController !== "undefined"){
+          var ctrl = new AbortController();
+          timer = setTimeout(function(){ ctrl.abort(); }, timeoutMs);
+          init.signal = ctrl.signal;
+        }
+        var t0 = Date.now();
+        function go(url){
+          return fetch(url, init).then(function(res){
+            if(!res.ok) return res.text().then(function(t){ throw new Error("HTTP " + res.status + " " + String(t).slice(0,140)); });
+            return res.json();
+          });
+        }
+        go(provider.apiBase).catch(function(err){
+          if(location.protocol !== "file:" && err && err.name === "TypeError")
+            return go("/proxy?" + encodeURIComponent(provider.apiBase));
+          throw err;
+        }).then(function(j){
+          if(timer) clearTimeout(timer);
+          var content = pickContent(j);
+          if(!usableText(content)) throw new Error("返回里没有可解析的正文");
+          aiUsage.unshift({ ts:Date.now(), provider:provider.id, model:provider.textModel, ok:true,
+            ms:Date.now() - t0, tin:tokens(JSON.stringify(messages)), tout:tokens(content), err:"", fb:retry > 0 });
+          if(aiUsage.length > 300) aiUsage.length = 300;
+          save(K.usage, aiUsage);
+          renderUsage();
+          resolve({ content:content, provider:provider.id });
+        }).catch(function(e){
+          if(timer) clearTimeout(timer);
+          var msg = (e && e.message) || String(e);
+          tried.push(provider.id + ":" + msg.slice(0, 50));
+          aiUsage.unshift({ ts:Date.now(), provider:provider.id, model:provider.textModel, ok:false,
+            ms:Date.now() - t0, tin:0, tout:0, err:msg.slice(0, 150), fb:false });
+          save(K.usage, aiUsage);
+          renderUsage();
+          if(retry < 2){ setTimeout(function(){ attempt(provider, retry + 1); }, 700 * (retry + 1)); return; }
+          var nx = nextProvider(provider.id);
+          if(nx && tried.join("|").indexOf(nx.id + ":") < 0) attempt(nx, 0);
+          else reject(new Error("全部供应商失败：" + tried.join(" | ")));
+        });
+      }
+      attempt(main, 0);
+    });
+  }
+  function renderProviders(){
+    $("#providerCount").textContent = aiProviders.length;
+    $("#providerList").innerHTML = aiProviders.map(function(p){
+      return '<div class="provider-card' + (p.enabled ? "" : " off") + '"><div class="provider-head">'
+        + '<label class="check"><input type="checkbox" data-act="toggleProvider" data-id="' + p.id + '"'
+        + (p.enabled ? " checked" : "") + "> 启用</label><b>" + esc(p.label) + "</b>"
+        + (p.apiKey ? '<span class="badge ok">已配 Key</span>' : '<span class="badge">未配 Key</span>')
+        + '</div><div class="form-grid">'
+        + '<div class="field full"><label>接口地址（OpenAI 兼容 chat/completions）</label>'
+        + '<input class="input" data-pf="apiBase" data-id="' + p.id + '" value="' + esc(p.apiBase) + '"></div>'
+        + '<div class="field"><label>API Key</label><input class="input" type="password" data-pf="apiKey" data-id="' + p.id
+        + '" value="' + esc(p.apiKey) + '" placeholder="仅存本机"></div>'
+        + '<div class="field"><label>模型名</label><input class="input" data-pf="textModel" data-id="' + p.id
+        + '" value="' + esc(p.textModel) + '"></div>'
+        + "</div></div>";
+    }).join("");
+    var ap = activeProvider();
+    var ready = aiProviders.filter(function(p){ return p.enabled && p.apiKey; }).length;
+    $("#aiSceneLine").textContent = ap ? ("可用 " + ready + " 个，主用：" + ap.label) : "尚未配置 Key";
+  }
+  function renderUsage(){
+    var box = $("#usageWrap");
+    if(!aiUsage.length){ box.innerHTML = '<div class="empty"><h3>还没有调用记录</h3><p>配好 Key 后点「连通性测试」</p></div>'; return; }
+    box.innerHTML = '<table class="dt"><thead><tr><th>时间</th><th>供应商</th><th>结果</th><th class="num">耗时</th>'
+      + '<th class="num">Tokens</th><th>错误</th></tr></thead><tbody>'
+      + aiUsage.slice(0, 15).map(function(u){
+          return "<tr><td>" + fmtDateTime(u.ts) + "</td><td>" + esc(u.provider) + "</td><td>"
+            + (u.ok ? '<span class="badge ok">成功</span>' : '<span class="badge high">失败</span>')
+            + (u.fb ? '<span class="badge mid">降级</span>' : "") + '</td><td class="num">' + nfmt(u.ms) + "ms</td>"
+            + '<td class="num">' + nfmt(u.tin) + "/" + nfmt(u.tout) + '</td><td class="dim mono">'
+            + esc(String(u.err || "").slice(0, 70)) + "</td></tr>";
+        }).join("") + "</tbody></table>";
+  }
+  function renderChat(){
+    var box = $("#chatBox");
+    box.innerHTML = chatMsgs.length ? chatMsgs.map(function(m){
+      return '<div class="msg ' + (m.role === "user" ? "user" : "bot") + '"><div class="who">'
+        + (m.role === "user" ? "我" : esc(m.provider || "AI")) + "</div>" + esc(m.content) + "</div>";
+    }).join("") : '<div class="tip">配好任一供应商 Key 后即可提问：让 AI 基于筛选结果做归因、排优先级、写跟进话术。</div>';
+    box.scrollTop = box.scrollHeight;
+  }
+  function filteredSummary(){
+    var list = filtered();
+    var top = list.slice().sort(function(a, b){ return (cell(b, L.hot) || 0) - (cell(a, L.hot) || 0); }).slice(0, 8);
+    var gap = 0;
+    list.forEach(function(r){ var g = gapQ(r); if(isNum(g)) gap += g; });
+    return "当前筛选：" + (filters.quick ? QUICK[filters.quick].label : "全部") + "，共 " + list.length + " 家，优爆品合计 "
+      + nfmt(sum(L.hot, list)) + "，当季缺口合计 " + nfmt(gap) + "。代表商家："
+      + top.map(function(r){ return cell(r, L.name) + "(" + cell(r, L.hot) + ")"; }).join("、");
+  }
+  function aiSend(withSummary){
+    var input = $("#chatInput");
+    var text = String(input.value || "").trim();
+    if(!text){ toast("先输入问题"); return; }
+    if(!activeProvider()){ toast("请先在下方启用供应商并填 Key"); return; }
+    chatMsgs.push({ role:"user", content:text, ts:Date.now() });
+    save(K.chat, chatMsgs.slice(-60));
+    renderChat();
+    input.value = "";
+    var holder = document.createElement("div");
+    holder.className = "msg bot";
+    holder.innerHTML = '<div class="who">AI</div>思考中…';
+    $("#chatBox").appendChild(holder);
+    var msgs = [{ role:"system", content:"你是阿里巴巴国际站运营顾问，服务对象是渠道服务商的客户经理。回答用中文，简洁、给可执行动作，必要时用编号列表。" }];
+    if(withSummary) msgs.push({ role:"user", content:"（数据背景）" + filteredSummary() });
+    msgs.push({ role:"user", content:text });
+    aiCall(msgs).then(function(r){
+      chatMsgs.push({ role:"bot", content:r.content, provider:r.provider, ts:Date.now() });
+      save(K.chat, chatMsgs.slice(-60));
+      renderChat();
+    }).catch(function(e){
+      holder.innerHTML = '<div class="who">AI</div>调用失败：' + esc((e && e.message) || String(e));
+      setTimeout(renderChat, 1800);
+    });
+  }
+  function aiTest(){
+    if(!activeProvider()){ toast("请先启用供应商并填 Key"); return; }
+    toast("测试中…");
+    aiCall([{ role:"user", content:"只回复两个字：正常" }], 30000).then(function(r){
+      toast("连通正常（" + r.provider + "）");
+      renderProviders();
+    }).catch(function(e){ toast("失败：" + String((e && e.message) || e).slice(0, 80)); });
+  }
+
+  /* ---------------- 外观 ---------------- */
+  var SKINS = [
+    { id:"teal", label:"青瓷", color:"#2f8f83" }, { id:"blue", label:"黛蓝", color:"#4f86c6" },
+    { id:"green", label:"松绿", color:"#4f9e6b" }, { id:"orange", label:"杏黄", color:"#b58a3e" },
+    { id:"rose", label:"玫红", color:"#b56a8e" }, { id:"purple", label:"藕荷", color:"#7a6fc4" }
+  ];
+  function applyAppearance(){
+    var h = document.documentElement;
+    h.setAttribute("data-skin", settings.skin || "teal");
+    h.setAttribute("data-theme", settings.dark ? "dark" : "light");
+    $("#brandTitle").textContent = settings.name || "运营工作台";
+    $("#brandLogo").textContent = settings.logo || "运";
+    document.title = (settings.name || "运营工作台") + (DS.meta.asOf ? " · 截至" + DS.meta.asOf : "");
+    $("#sidebar").classList.toggle("collapsed", !!settings.collapsed);
+    $("#btnTheme").innerHTML = settings.dark ? "&#9788;" : "&#9789;";
+    $("#skinRow").innerHTML = SKINS.map(function(s){
+      return '<button class="skin-dot' + (settings.skin === s.id ? " active" : "") + '" type="button" data-act="skin" '
+        + 'data-skin="' + s.id + '" title="' + s.label + '" style="background:' + s.color + '"></button>';
+    }).join("");
+    $("#skinRow2").innerHTML = SKINS.map(function(s){
+      return '<button class="btn sm' + (settings.skin === s.id ? " primary" : "") + '" type="button" data-act="skin" '
+        + 'data-skin="' + s.id + '">' + s.label + "</button>";
+    }).join("");
+  }
+
+  /* ---------------- 数据源 / 校验 / 导入导出 ---------------- */
+  function renderSrcInfo(){
+    var g = {};
+    DS.cols.forEach(function(c){ g[c.group] = (g[c.group] || 0) + 1; });
+    $("#srcInfo").innerHTML = "文件：<b>" + esc(DS.meta.source || "-") + "</b>　工作表：" + esc(DS.meta.sheet || "-")
+      + "<br>规模：<b>" + DS.rows.length + " 行 × " + DS.cols.length + " 列</b>　数据截至：<b>" + esc(DS.meta.asOf || "-") + "</b>"
+      + "<br>生成时间：" + esc(DS.meta.generatedAt || "-") + "<br>方式：" + esc(DS.meta.generator || "-")
+      + (DS.meta.imported ? '<br><span class="badge mid">来自手动导入</span>' : '<br><span class="badge ok">内置数据 ops-data.js</span>');
+    $("#groupInfo").innerHTML = Object.keys(g).map(function(k){
+      return '<span class="badge plain" style="margin:0 6px 6px 0">' + esc(k) + " · " + g[k] + " 列</span>";
+    }).join("");
+  }
+  function numSums(){
+    var out = [];
+    for(var c = 1; c <= DS.cols.length; c++){
+      var t = DS.cols[c - 1].type, s = null;
+      if(t === "int" || t === "num" || t === "ratio" || t === "money"){
+        s = 0;
+        for(var r = 0; r < DS.rows.length; r++){
+          var v = DS.rows[r][c - 1];
+          if(typeof v === "number" && isFinite(v)) s += v;
+        }
+        s = Math.round(s * 1e6) / 1e6;
+      }
+      out.push(s);
+    }
+    return out;
+  }
+  function nonnullCounts(){
+    var out = [];
+    for(var c = 1; c <= DS.cols.length; c++){
+      var n = 0;
+      for(var r = 0; r < DS.rows.length; r++){
+        var v = DS.rows[r][c - 1];
+        if(v !== null && v !== undefined && v !== "") n++;
+      }
+      out.push(n);
+    }
+    return out;
+  }
+  function verifyData(){
+    if(!DS.rows.length){ toast("没有数据"); return; }
+    var sums = numSums(), nn = nonnullCounts();
+    var refSum = DS.meta.numSum || null, refNN = DS.meta.nonnull || null;
+    var badSum = [], badNN = [];
+    for(var i = 0; i < DS.cols.length; i++){
+      if(refNN && refNN[i] !== nn[i]) badNN.push(DS.cols[i].label + " 期望 " + refNN[i] + " / 实际 " + nn[i]);
+      if(refSum && refSum[i] !== null && refSum[i] !== undefined && sums[i] !== null
+         && Math.abs(refSum[i] - sums[i]) > 1e-6) badSum.push(DS.cols[i].label + " 期望 " + refSum[i] + " / 实际 " + sums[i]);
+    }
+    var totalCells = 0;
+    nn.forEach(function(v){ totalCells += v; });
+    var html = '<div class="tbl-wrap" style="max-height:none"><table class="dt"><tbody>'
+      + '<tr><td>行数</td><td class="num">' + DS.rows.length + "</td><td>" + (DS.meta.rows ? (DS.meta.rows === DS.rows.length ? "与源表一致" : "不一致") : "—") + "</td></tr>"
+      + '<tr><td>列数</td><td class="num">' + DS.cols.length + "</td><td>" + (DS.meta.cols ? (DS.meta.cols === DS.cols.length ? "与源表一致" : "不一致") : "—") + "</td></tr>"
+      + '<tr><td>非空单元格</td><td class="num">' + nfmt(totalCells) + "</td><td>—</td></tr>"
+      + '<tr><td>数值列合计</td><td class="num">' + (refSum ? (DS.cols.length - badSum.length) + " / " + DS.cols.length : "—") + "</td><td>"
+      + (badSum.length ? '<span class="neg">' + badSum.length + " 列不一致</span>" : '<span class="pos">全部一致</span>') + "</td></tr>"
+      + '<tr><td>非空数</td><td class="num">' + (refNN ? (DS.cols.length - badNN.length) + " / " + DS.cols.length : "—") + "</td><td>"
+      + (badNN.length ? '<span class="neg">' + badNN.length + " 列不一致</span>" : '<span class="pos">全部一致</span>') + "</td></tr>"
+      + "</tbody></table></div>"
+      + (badSum.length || badNN.length
+          ? '<div class="tip" style="margin-top:10px">' + esc(badSum.concat(badNN).slice(0, 12).join("；")) + "</div>"
+          : '<div class="tip" style="margin-top:10px">页面所用的每个数值都与导出时记录的逐列合计、非空数一致，说明表格数据没有被工作台改写。</div>');
+    openModal({ title:"数据校验结果", body: html,
+      buttons:[{ label:"关闭", style:"ghost" }, { label:"复制报告", style:"primary" }],
+      onOk:function(){
+        var txt = "数据校验 " + (DS.meta.source || "") + " 行 " + DS.rows.length + " 列 " + DS.cols.length
+          + "\n数值列合计不一致 " + badSum.length + "：" + badSum.join("; ")
+          + "\n非空数不一致 " + badNN.length + "：" + badNN.join("; ");
+        if(navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(txt).then(function(){ toast("报告已复制"); }, function(){ toast("复制失败"); });
+        else toast("该浏览器不支持自动复制");
+        return false;
+      } });
+  }
+  function exportDataCSV(){
+    var list = currentList();
+    if(!list.length){ toast("没有数据可导出"); return; }
+    var rows = [visible.map(function(k){ return DERMAP[k] ? DERMAP[k].label : k; })];
+    list.forEach(function(r){
+      rows.push(visible.map(function(k){
+        var v = rawOf(r, k);
+        return (v === null || v === undefined) ? "" : v;
+      }));
+    });
+    downloadText("商家数据视图-" + todayStr() + ".csv", toCSV(rows), "text/csv");
+  }
+  function typeForLabel(label, values){
+    var known = null;
+    BASE.cols.forEach(function(c){ if(c.label === label) known = c.type; });
+    if(known) return known;
+    var allNum = true, ratioish = true;
+    values.forEach(function(v){
+      if(v === null || v === undefined || v === "") return;
+      if(typeof v !== "number") allNum = false;
+      else if(v < 0 || v > 1) ratioish = false;
+    });
+    if(!allNum) return /时间|日期/.test(label) ? "date" : "text";
+    return ratioish ? "ratio" : "int";
+  }
+  function groupForLabel(label){
+    var g = "新列";
+    BASE.cols.forEach(function(c){ if(c.label === label) g = c.group; });
+    return g;
+  }
+  function importData(){
+    var fp = $("#filePick");
+    if(typeof XLSX === "undefined"){ toast("xlsx.bundle.js 未加载，只能读 CSV"); return; }
+    fp.accept = ".xlsx,.xls,.csv";
+    fp.onchange = function(){
+      var f = fp.files && fp.files[0];
+      if(!f) return;
+      var fr = new FileReader();
+      fr.onload = function(){
+        try{
+          if(!fr.result){ throw new Error("文件读取失败"); }
+          var wb = XLSX.read(fr.result, { type:"array", cellDates:false });
+          var sheetName = wb.SheetNames[0];
+          var aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header:1, blankrows:false, defval:null });
+          if(!aoa || aoa.length < 2) throw new Error("表里没有找到数据行");
+          var n = aoa[0].length;
+          var headers = aoa[0].map(function(h, i){ return String(h === null || h === undefined || String(h).trim() === "" ? ("第" + (i+1) + "列") : h).trim(); });
+          var rows = [];
+          for(var i = 1; i < aoa.length; i++){
+            var src = aoa[i], out = [], has = false;
+            for(var c = 0; c < n; c++){
+              var v = src[c];
+              if(v === undefined) v = null;
+              if(v instanceof Date) v = Number("" + v.getFullYear() + String(v.getMonth()+1).padStart(2,"0") + String(v.getDate()).padStart(2,"0"));
+              if(typeof v === "string" && v.trim() === "") v = null;
+              if(v !== null) has = true;
+              out.push(v);
+            }
+            if(has) rows.push(out);
+          }
+          var nn = [], sm = [];
+          for(var c2 = 1; c2 <= n; c2++){
+            var k = 0, s = 0;
+            rows.forEach(function(r){
+              var v = r[c2 - 1];
+              if(v !== null){ k++; if(typeof v === "number") s += v; }
+            });
+            nn.push(k);
+            sm.push(k ? Math.round(s * 1e6) / 1e6 : null);
+          }
+          var cols = headers.map(function(h, idx){
+            var vals = rows.map(function(r){ return r[idx]; });
+            return { i: idx + 1, label:h, type:typeForLabel(h, vals), group:groupForLabel(h),
+                     show: DEFAULT_SHOW.indexOf(h) >= 0 };
+          });
+          applyDataset({ meta:{ source:f.name, sheet:sheetName,
+              asOf:(f.name.match(/(\d{1,2}\.\d{1,2})/) || [])[1] || "", rows:rows.length, cols:n,
+              generatedAt:fmtDateTime(Date.now()),
+              generator:"浏览器导入 SheetJS " + (XLSX.version || ""), nonnull:nn, numSum:sm, imported:true },
+            cols:cols, rows:rows }, true);
+          toast("已导入 " + rows.length + " 行 × " + n + " 列");
+        }catch(err){
+          toast("导入失败：" + ((err && err.message) || err));
+        }
+      };
+      fr.onerror = function(){ toast("读取文件失败"); };
+      fr.readAsArrayBuffer(f);
+    };
+    fp.click();
+  }
+  function applyDataset(next, persist){
+    DS = next;
+    indexDataset();
+    visible = DS.cols.filter(function(c){ return c.show; }).map(function(c){ return c.label; });
+    DERIVED.forEach(function(d){ if(DEFAULT_SHOW.indexOf(d.key) >= 0) visible.push(d.key); });
+    if(visible.indexOf(L.name) < 0) visible.unshift(L.name);
+    settings.visible = visible.slice();
+    save(K.settings, settings);
+    if(persist) save(K.data, DS);
+    sort = { key: COLIDX[L.hot] !== undefined ? L.hot : DS.cols[0].label, dir:"desc" };
+    filters = { q:"", ind:"", year:"", sale:"", gold:"", quick:"" };
+    var q = $("#q"); if(q) q.value = "";
+    ["#fInd","#fYear","#fSale","#fGold"].forEach(function(sel){ var e2 = $(sel); if(e2) e2.selectedIndex = 0; });
+    fillFilterOptions();
+    render();
+  }
+  function resetData(){
+    openModal({ title:"恢复内置数据",
+      body:'<div class="tip">将丢弃手动导入的表格，回到内置的 <b>' + esc(BASE.meta.source) + "</b>。待办与跟进记录不受影响。</div>",
+      buttons:[{ label:"取消", style:"ghost" }, { label:"恢复", style:"primary" }],
+      onOk:function(){
+        try { localStorage.removeItem(K.data); } catch(e){}
+        _mem[K.data] = null;
+        applyDataset(BASE, false);
+        toast("已恢复内置数据");
+        return true;
+      } });
+  }
+  function fillSettings(){
+    $("#setName").value = settings.name || "";
+    $("#setLogo").value = settings.logo || "";
+    $("#setDark").checked = !!settings.dark;
+    var bytes = 0;
+    [K.settings, K.tasks, K.notes, K.providers, K.usage, K.chat, K.data].forEach(function(k){
+      var v = lsGet(k);
+      if(v) bytes += v.length;
+    });
+    $("#dataStats").innerHTML = "待办 <b>" + tasks.length + "</b> 项 · 有跟进笔记的商家 <b>" + Object.keys(notes).length
+      + "</b> 家 · AI 调用记录 <b>" + aiUsage.length + "</b> 条<br>本地存储占用约 <b>" + (bytes / 1024).toFixed(1)
+      + " KB</b>（导入的数据表也存在这里；API Key 不会被写进导出文件）";
+    $("#storeDetail").innerHTML = _lsOk ? 'localStorage 正常，键前缀 <span class="mono">' + P + "</span>"
+      : '<span class="neg">localStorage 被禁用</span>，刷新即丢失，请用「启动本地服务器.bat」打开';
+    $("#storeStatus").textContent = _lsOk ? "本地存储就绪" : "仅临时存储";
+  }
+  function saveSettingsForm(){
+    settings.name = ($("#setName").value || "").trim() || "运营工作台";
+    settings.logo = ($("#setLogo").value || "").trim() || "运";
+    settings.dark = !!$("#setDark").checked;
+    save(K.settings, settings);
+    applyAppearance();
+    render();
+    toast("设置已保存");
+  }
+  function exportAll(){
+    var payload = { app:"operations-workbench", version:1, exportedAt:Date.now(),
+      settings:settings, tasks:tasks, notes:notes, usage:aiUsage.slice(0, 50), chat:chatMsgs.slice(-20) };
+    downloadText("运营工作台待办笔记-" + todayStr() + ".json", JSON.stringify(payload, null, 2), "application/json");
+  }
+  function clearAllLocal(){
+    openModal({ title:"清空待办与跟进",
+      body:'<div class="tip">将删除全部待办任务、跟进记录、AI 对话与调用记录。<b>数据表本身不受影响。</b></div>',
+      buttons:[{ label:"取消", style:"ghost" }, { label:"确认清空", style:"danger" }],
+      onOk:function(){
+        tasks = []; notes = {}; aiUsage = []; chatMsgs = [];
+        save(K.tasks, tasks); save(K.notes, notes); save(K.usage, aiUsage); save(K.chat, chatMsgs);
+        render();
+        toast("已清空");
+        return true;
+      } });
+  }
+
+  /* ---------------- 渲染入口 ---------------- */
+  function updateCounts(){
+    var open = tasks.filter(function(t){ return t.status !== "done"; }).length;
+    $("#navCountTasks").textContent = open;
+  }
+  function render(){
+    updateCounts();
+    renderDashboard();
+    renderTable();
+    renderGoals();
+    renderChances();
+    renderTasks();
+    renderProviders();
+    renderChat();
+    renderUsage();
+    fillSettings();
+    renderSrcInfo();
+  }
+  function showView(v){
+    view = v;
+    $all(".page").forEach(function(p){ p.classList.toggle("active", p.id === "page-" + v); });
+    $all("#nav .nav-item").forEach(function(a){ a.classList.toggle("active", a.getAttribute("data-view") === v); });
+    var sc = $(".main-scroll"); if(sc) sc.scrollTop = 0;
+    if(v === "data") renderTable();
+  }
+
+  /* ---------------- 弹窗 ---------------- */
+  var modalCtx = null;
+  function openModal(o){
+    modalCtx = o;
+    $("#modalTitle").textContent = o.title || "";
+    $("#modalBody").innerHTML = o.body || "";
+    $("#modal").classList.toggle("wide", !!o.wide);
+    $("#modalFoot").innerHTML = (o.buttons || []).map(function(b, i){
+      return '<button class="btn ' + (b.style || "") + '" type="button" data-act="modalBtn" data-i="' + i + '">'
+        + esc(b.label) + "</button>";
+    }).join("");
+    $("#mask").classList.add("show");
+    var f = $("#modalBody").querySelector("input,textarea,select");
+    if(f) setTimeout(function(){ f.focus(); }, 60);
+    if(o.onOpen) setTimeout(o.onOpen, 40);
+  }
+  function closeModal(){ $("#mask").classList.remove("show"); modalCtx = null; }
+  function openDrawerClose(){ $("#drawer").classList.remove("show"); selected = null; renderTable(); }
+
+  /* ---------------- 事件委托 ---------------- */
+  function byAttr(el, attr){
+    while(el && el !== document.body){
+      if(el.getAttribute && el.getAttribute(attr)) return el;
+      el = el.parentNode;
+    }
+    return null;
+  }
+  document.addEventListener("click", function(e){
+    if(e.target.id === "mask"){ closeModal(); return; }
+    var seg = e.target.closest ? e.target.closest("#taskStatusSeg button") : null;
+    if(seg){
+      taskFilter.status = seg.getAttribute("data-status") || "open";
+      $all("#taskStatusSeg button").forEach(function(b){ b.classList.toggle("active", b === seg); });
+      renderTasks();
+      return;
+    }
+    var el = byAttr(e.target, "data-act");
+    if(!el) return;
+    var tag = String(e.target.tagName || "").toUpperCase();
+    if(tag !== "INPUT" && tag !== "SELECT" && tag !== "TEXTAREA" && e.preventDefault) e.preventDefault();
+    var act = el.getAttribute("data-act");
+    var id = el.getAttribute("data-id");
+    var key = el.getAttribute("data-key");
+    var n = el.getAttribute("data-n");
+    switch(act){
+      case "skin": settings.skin = el.getAttribute("data-skin"); save(K.settings, settings); applyAppearance(); break;
+      case "goto": showView(el.getAttribute("data-view")); break;
+      case "sortBy":
+        if(sort.key === key) sort.dir = sort.dir === "asc" ? "desc" : "asc";
+        else { sort.key = key; sort.dir = (key === L.name || colType(key) === "text") ? "asc" : "desc"; }
+        renderTable();
+        break;
+      case "resetSort": sort = { key:"__row", dir:"asc" }; renderTable(); toast("已还原原表顺序"); break;
+      case "pickCols": pickCols(); break;
+      case "exportData": exportDataCSV(); break;
+      case "openRow": openRow(parseInt(n, 10)); break;
+      case "closeDrawer": openDrawerClose(); break;
+      case "drawerTask": if(selected) taskForm({ merchant:String(cell(selected, L.name) || ""), merchantId:noteKey(selected) }); break;
+      case "drawerNote": addNote(); break;
+      case "drawerAsk":
+        if(!selected) break;
+        showView("ai");
+        var ci = $("#chatInput");
+        ci.value = "这家商家的情况：" + rowSummaryText(selected) + "\n请给出本周三个最该做的动作和理由。";
+        toast("已把该商家摘要填入输入框");
+        break;
+      case "drawerCopy":
+        if(!selected) break;
+        if(navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(rowSummaryText(selected)).then(function(){ toast("摘要已复制"); }, function(){ toast("复制失败"); });
+        else toast("浏览器不支持自动复制");
+        break;
+      case "delNote":
+        if(selected && notes[noteKey(selected)]){
+          notes[noteKey(selected)] = notes[noteKey(selected)].filter(function(x){ return String(x.ts) !== el.getAttribute("data-ts"); });
+          save(K.notes, notes); renderNotes();
+        }
+        break;
+      case "quick":
+        filters.quick = filters.quick === key ? "" : key;
+        fillFilterOptions(); renderTable();
+        break;
+      case "goalGroup":
+        goalGroupKey = key;
+        $all("#goalTabs button").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-key") === key); });
+        renderGoals();
+        break;
+      case "chanceTab":
+        chanceKey = key;
+        $all("#chanceTabs button").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-key") === key); });
+        renderChances();
+        break;
+      case "chanceTask": chanceToTask(parseInt(n, 10)); break;
+      case "newTask": taskForm(null); break;
+      case "editTask": taskForm(null, id); break;
+      case "toggleTask": toggleTask(id); break;
+      case "startTask": {
+          var t = tasks.find(function(x){ return x.id === id; });
+          if(t){ t.status = "doing"; t.updatedAt = Date.now(); save(K.tasks, tasks); renderTasks(); }
+        }
+        break;
+      case "delTask": {
+          var d2 = tasks.find(function(x){ return x.id === id; });
+          if(!d2) break;
+          openModal({ title:"删除任务", body:'<div class="tip">删除「<b>' + esc(d2.title) + "</b>」？不可撤销。</div>",
+            buttons:[{ label:"取消", style:"ghost" }, { label:"删除", style:"danger" }],
+            onOk:function(){ tasks = tasks.filter(function(x){ return x.id !== id; }); save(K.tasks, tasks); renderTasks(); updateCounts(); toast("已删除"); return true; } });
+        }
+        break;
+      case "exportTasks": exportTasks(); break;
+      case "aiSend": aiSend(false); break;
+      case "aiInject": aiSend(true); break;
+      case "aiClear": chatMsgs = []; save(K.chat, chatMsgs); renderChat(); break;
+      case "clearUsage": aiUsage = []; save(K.usage, aiUsage); renderUsage(); break;
+      case "aiTest": aiTest(); break;
+      case "scrollProviders": { var a = $("#providersAnchor"); if(a) a.scrollIntoView({ behavior:"smooth" }); } break;
+      case "verify": verifyData(); break;
+      case "importData": importData(); break;
+      case "resetData": resetData(); break;
+      case "saveSettings": saveSettingsForm(); break;
+      case "exportAll": exportAll(); break;
+      case "clearAll": clearAllLocal(); break;
+      case "closeModal": closeModal(); break;
+      case "colsDefault":
+        $all('#modalBody input[type="checkbox"]').forEach(function(cb){
+          cb.checked = DEFAULT_SHOW.indexOf(cb.getAttribute("data-key")) >= 0;
+        });
+        break;
+      case "colsAllNum":
+        $all('#modalBody input[type="checkbox"]').forEach(function(cb){
+          var k = cb.getAttribute("data-key");
+          cb.checked = DERMAP[k] ? true : (colType(k) !== "text" && colType(k) !== "date");
+        });
+        break;
+      case "colsNone":
+        $all('#modalBody input[type="checkbox"]').forEach(function(cb){ cb.checked = cb.getAttribute("data-key") === L.name; });
+        break;
+      case "modalBtn": {
+          var i = parseInt(el.getAttribute("data-i"), 10);
+          var btns = (modalCtx && modalCtx.buttons) || [];
+          if(i === btns.length - 1 && modalCtx && modalCtx.onOk){
+            if(modalCtx.onOk() !== false) closeModal();
+          } else closeModal();
+        }
+        break;
+    }
+  });
+  document.addEventListener("change", function(e){
+    var t = e.target;
+    if(t.getAttribute && t.getAttribute("data-act") === "toggleProvider"){
+      var p = aiProviders.find(function(x){ return x.id === t.getAttribute("data-id"); });
+      if(p){ p.enabled = !!t.checked; saveProviders(); renderProviders(); }
+      return;
+    }
+    if(t.getAttribute && t.getAttribute("data-pf")){
+      var pv = aiProviders.find(function(x){ return x.id === t.getAttribute("data-id"); });
+      if(pv){ pv[t.getAttribute("data-pf")] = String(t.value || "").trim(); saveProviders(); renderProviders(); toast("供应商配置已保存"); }
+      return;
+    }
+    if(t.id === "fInd"){ filters.ind = t.value; renderTable(); }
+    if(t.id === "fYear"){ filters.year = t.value; renderTable(); }
+    if(t.id === "fSale"){ filters.sale = t.value; renderTable(); }
+    if(t.id === "fGold"){ filters.gold = t.value; renderTable(); }
+    if(t.id === "taskSort"){ taskFilter.sort = t.value; renderTasks(); }
+  });
+  document.addEventListener("input", function(e){
+    if(e.target.id === "q"){ filters.q = e.target.value; renderTable(); }
+    if(e.target.id === "taskSearch"){ taskFilter.q = e.target.value; renderTasks(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape"){
+      if($("#mask").classList.contains("show")) closeModal();
+      else if($("#drawer").classList.contains("show")) openDrawerClose();
+      return;
+    }
+    if((e.ctrlKey || e.metaKey) && e.key === "Enter" && e.target.id === "chatInput"){ aiSend(false); return; }
+    if((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")){
+      showView("data");
+      var q = $("#q");
+      if(q) setTimeout(function(){ q.focus(); q.select(); }, 60);
+      e.preventDefault();
+    }
+  });
+  $("#btnCollapse").addEventListener("click", function(){
+    settings.collapsed = !settings.collapsed; save(K.settings, settings); applyAppearance();
+  });
+  $("#btnTheme").addEventListener("click", function(){
+    settings.dark = !settings.dark; save(K.settings, settings); applyAppearance(); fillSettings();
+  });
+  $("#nav").addEventListener("click", function(e){
+    var it = byAttr(e.target, "data-view");
+    if(it && it.getAttribute("data-act") !== "goto") showView(it.getAttribute("data-view"));
+  });
+
+  /* ---------------- 自检钩子（供外部验证脚本调用） ---------------- */
+  window.__opsSelftest = function(){
+    var out = {};
+    out.rows = DS.rows.length;
+    out.cols = DS.cols.length;
+    out.visible = visible.length;
+    out.jsonRoundTrip = (function(){ var s = JSON.stringify({ a:1, b:"x" }); var d = read("tmp_probe_" + Date.now(), null); return s === '{"a":1,"b":"x"}'; })();
+    out.nfmt = nfmt(1234.5, 1);
+    out.date = dateFromYMD(20230703);
+    out.hotMax = (function(){
+      var list = DS.rows.slice().sort(comparator(L.hot, "desc"));
+      return { name:cell(list[0], L.name), hot:cell(list[0], L.hot) };
+    })();
+    out.nullLast = (function(){
+      var asc = DS.rows.slice().sort(comparator(L.qTarget, "asc"));
+      var last = asc[asc.length - 1];
+      return { ascLastBlank: cell(last, L.qTarget) === null || cell(last, L.qTarget) === undefined };
+    })();
+    out.yearOrder = (function(){
+      var list = DS.rows.slice().sort(comparator(L.yearCls, "asc"));
+      var seen = [];
+      list.forEach(function(r){ var v = cell(r, L.yearCls); if(v && seen.indexOf(v) < 0) seen.push(v); });
+      return seen.slice(0, 6);
+    })();
+    out.rateSample = (function(){
+      var r = DS.rows[0];
+      return { name:cell(r, L.name), hot:cell(r, L.hot), target:cell(r, L.qTarget), rate:rateQ(r) };
+    })();
+    out.kpiCount = kpiCards().length;
+    out.hasXLSX = typeof window.XLSX !== "undefined";
+    out.sumsMatch = (function(){
+      var s = numSums(), ref = DS.meta.numSum || [];
+      var bad = 0;
+      for(var i = 0; i < DS.cols.length; i++)
+        if(ref[i] !== null && ref[i] !== undefined && s[i] !== null && Math.abs(ref[i] - s[i]) > 1e-6) bad++;
+      return bad;
+    })();
+    return out;
+  };
+
+  /* ---------------- 启动 ---------------- */
+  applyAppearance();
+  fillFilterOptions();
+  render();
+  if(!_lsOk) warnStore();
+})();
+</script>
+</body>
+</html>
+

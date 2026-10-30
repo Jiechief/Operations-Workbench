@@ -1,0 +1,9 @@
+.workbuddy/
+build/
+~$*
+*.log
+__pycache__/
+*.pyc
+_check.js
+*.tmp
+.DS_Store
